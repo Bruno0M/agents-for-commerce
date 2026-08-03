@@ -8,6 +8,10 @@ node_modules/
 dist/
 .cache/
 
+# .NET
+bin/
+obj/
+
 # Cloudflare Workers
 .wrangler/
 .dev.vars

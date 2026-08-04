@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RollForward>Major</RollForward>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ModelContextProtocol.AspNetCore" Version="1.2.0" />
+    <PackageReference Include="ShopifySharp" Version="6.28.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="McpServer.Tests/**" />
+    <Content Remove="McpServer.Tests/**" />
+    <None Remove="McpServer.Tests/**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="McpServer.Tests" />
+  </ItemGroup>
+
+</Project>

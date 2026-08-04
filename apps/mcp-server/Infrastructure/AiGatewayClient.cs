@@ -113,6 +113,12 @@ public record AiGatewayMessage(
     [property: JsonPropertyName("role")] string Role,
     [property: JsonPropertyName("content")] string Content);
 
+/// <summary>
+/// Which model (in the Gateway's "provider/model" shape, e.g. "anthropic/claude-sonnet-5")
+/// the content-generation and buyer-agent-simulator tools call by default.
+/// </summary>
+public record AiGatewayOptions(string Model);
+
 public record AiGatewayCompletionResult(string Content, AiGatewayUsage? Usage);
 
 /// <summary>

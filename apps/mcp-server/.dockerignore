@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+McpServer.Tests/
+docs/
+CONTEXT.md
+README.md
+Dockerfile
+.dockerignore
+compose.yaml
+.env
+.env.*

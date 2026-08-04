@@ -1,0 +1,26 @@
+# Compose de desenvolvimento local. O compose de produção (VPS) vive em
+# `ollim-infra` (/opt/ollim/agents-for-commerce/) e usa `expose:` + nginx,
+# não `ports:` — ver .scratch/mcp-server-mvp/issues/08-dockerfile-deploy-vps.md.
+name: agents-for-commerce
+
+services:
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: agents-for-commerce/mcp-server:dev
+    env_file:
+      - .env
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+    ports:
+      # 6142 é a porta que o launchSettings.json já usa em `dotnet run`,
+      # então a config do cliente MCP continua valendo.
+      - "6142:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/bin/busybox", "wget", "-q", "-O", "/dev/null", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s

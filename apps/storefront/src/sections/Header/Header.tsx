@@ -52,22 +52,32 @@ const MOBILE_ICON_LABEL_CLASS =
 
 const Desktop = ({ navItems, logo, shippingNote }: Props) => (
   <>
-    <div className="flex items-center justify-between gap-3 px-3 pt-3 pb-2">
+    {/*
+      Grid (not flex justify-between) so the logo/nav pill is centered on
+      the row itself, not just balanced between the hamburger and the
+      sign-in/bag cluster. With navItems empty the pill shrinks to just the
+      logo, and those two side clusters are different widths — flex
+      justify-between would visibly pull it off-center toward the lighter
+      side.
+    */}
+    <div className="grid grid-cols-3 items-center gap-3 px-3 pt-3 pb-2">
       <label
         htmlFor={SIDEMENU_DRAWER_ID}
         aria-label="Open menu"
-        className="frost tap-scale flex size-10 shrink-0 items-center justify-center rounded-sm text-ink transition-colors duration-(--duration-fast) hover:bg-glass-strong"
+        className="frost tap-scale flex size-10 shrink-0 items-center justify-center justify-self-start rounded-sm text-ink transition-colors duration-(--duration-fast) hover:bg-glass-strong"
       >
         <Icon id="menu" size={18} />
       </label>
 
-      <HeaderNav
-        navItems={navItems ?? []}
-        logo={logo}
-        shippingNote={shippingNote ?? "Frete grátis em compras acima de R$500."}
-      />
+      <div className="justify-self-center">
+        <HeaderNav
+          navItems={navItems ?? []}
+          logo={logo}
+          shippingNote={shippingNote ?? "Frete grátis em compras acima de R$500."}
+        />
+      </div>
 
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center justify-self-end gap-1.5">
         <SignIn variant="desktop" />
         <Bag />
       </div>
@@ -109,10 +119,10 @@ const Mobile = ({ logo }: Props) => (
 function Header({
   alerts = [],
   logo = {
-    src: "https://decoims.com/decocms/e8c6326e-e009-4e3c-9787-b2fe25a1b993/deco-logo.png",
-    width: 67,
-    height: 28,
-    alt: "Logo",
+    src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 142 32' width='142' height='32' role='img' aria-label='AFC Audio'%3E%3Ctext x='2' y='23' font-family='Arial, Helvetica, sans-serif' font-size='23' font-weight='700' letter-spacing='0.4'%3E%3Ctspan fill='%230a0a0a'%3EAFC %3C/tspan%3E%3Ctspan fill='%23737373' letter-spacing='1.5'%3EAUDIO%3C/tspan%3E%3C/text%3E%3C/svg%3E",
+    width: 142,
+    height: 32,
+    alt: "AFC Audio",
   },
   navItems,
   searchbar,

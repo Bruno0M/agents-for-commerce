@@ -52,8 +52,6 @@ function Menu({ navItems = [], searchbar }: Props) {
       <ul className="flex flex-col gap-1 border-t border-ink-soft/10 py-4">
         {[
           { href: "/wishlist", icon: "favorite" as const, label: "Lista de desejos" },
-          { href: "https://www.deco.cx", icon: "home_pin" as const, label: "Nossas lojas" },
-          { href: "https://www.deco.cx", icon: "call" as const, label: "Fale conosco" },
           { href: "/account", icon: "account_circle" as const, label: "Minha conta" },
         ].map(({ href, icon, label }) => (
           <li key={label}>

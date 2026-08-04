@@ -4623,6 +4623,12 @@
             "title": "Products",
             "nullable": true
           },
+          "clearFixedHeader": {
+            "type": "boolean",
+            "nullable": true,
+            "title": "Clear fixed header",
+            "description": "Enable when this shelf is the first thing on the page (e.g. the homepage), so its title isn't hidden under the floating header, which is position:fixed and takes no space in normal flow."
+          },
           "title": {
             "type": "string",
             "nullable": true,

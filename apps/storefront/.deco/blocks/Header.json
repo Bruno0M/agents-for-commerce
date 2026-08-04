@@ -9,48 +9,11 @@
   },
   "alerts": [],
   "logo": {
-    "src": "https://decoims.com/decocms/e8c6326e-e009-4e3c-9787-b2fe25a1b993/deco-logo.png",
-    "alt": "Deco Storefront",
-    "width": 67,
-    "height": 28
+    "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 142 32' width='142' height='32' role='img' aria-label='AFC Audio'%3E%3Ctext x='2' y='23' font-family='Arial, Helvetica, sans-serif' font-size='23' font-weight='700' letter-spacing='0.4'%3E%3Ctspan fill='%230a0a0a'%3EAFC %3C/tspan%3E%3Ctspan fill='%23737373' letter-spacing='1.5'%3EAUDIO%3C/tspan%3E%3C/text%3E%3C/svg%3E",
+    "alt": "AFC Audio",
+    "width": 142,
+    "height": 32
   },
-  "navItems": [
-    {
-      "@type": "SiteNavigationElement",
-      "url": "/shirts",
-      "name": "Shirts",
-      "children": []
-    },
-    {
-      "@type": "SiteNavigationElement",
-      "url": "/hoodies-sweatshirts",
-      "name": "Hoodies & Sweatshirts",
-      "children": []
-    },
-    {
-      "@type": "SiteNavigationElement",
-      "url": "/jackets-outerwear",
-      "name": "Jackets & Outerwear",
-      "children": []
-    },
-    {
-      "@type": "SiteNavigationElement",
-      "url": "/bottoms",
-      "name": "Bottoms",
-      "children": []
-    },
-    {
-      "@type": "SiteNavigationElement",
-      "url": "/accessories",
-      "name": "Accessories",
-      "children": []
-    },
-    {
-      "@type": "SiteNavigationElement",
-      "url": "/stickers",
-      "name": "Stickers",
-      "children": []
-    }
-  ],
+  "navItems": [],
   "loading": "eager"
 }

@@ -8,8 +8,13 @@ import DeviceVisible, { type VisibilityConfig } from "../../components/ui/Device
 import { type LoadingFallbackProps } from "~/types/deco";
 export interface Props extends SectionHeaderProps, VisibilityConfig {
   products: Product[] | null;
+  /**
+   * @title Clear fixed header
+   * @description Enable when this shelf is the first thing on the page (e.g. the homepage), so its title isn't hidden under the floating header, which is position:fixed and takes no space in normal flow.
+   */
+  clearFixedHeader?: boolean;
 }
-export default function ProductShelf({ products, title, cta, visibility }: Props) {
+export default function ProductShelf({ products, title, cta, visibility, clearFixedHeader }: Props) {
   if (!products || products.length === 0) {
     return null;
   }
@@ -31,6 +36,7 @@ export default function ProductShelf({ products, title, cta, visibility }: Props
   });
   return (
     <DeviceVisible visibility={visibility}>
+      {clearFixedHeader && <div className="h-15" aria-hidden="true" />}
       <Section.Container {...viewItemListEvent}>
         <Section.Header title={title} cta={cta} />
 

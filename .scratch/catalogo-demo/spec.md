@@ -1,6 +1,6 @@
 # Catálogo de demo — áudio pessoal
 
-Fecha os itens 12.2 e 12.9 do `decisoes-pre-construcao`.
+Fecha o catálogo de teste curado e o conjunto de pedidos em linguagem natural — os dois pré-requisitos das rodadas antes/depois (ver `../entrega-hackathon/issues/04-rodadas-antes-depois.md`).
 
 ## Por que áudio
 

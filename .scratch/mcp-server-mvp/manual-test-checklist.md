@@ -33,18 +33,33 @@ container já rodando localmente (`docker compose up -d` em `apps/mcp-server/`).
 - [x] **`simulate_buyer_agent` — rodada "depois" (ticket 06)** — mesmo pedido,
       catálogo com `hasSchemaOrgMarkup: true`/descrição otimizada. **Mesmo
       resultado da rodada "antes"** — falhou pelo mesmo motivo.
-      **Achado**: `generate_optimized_content` não cria nenhum
-      option/metafield novo para "tipo de produto"/categoria — só reaproveita
-      `options`/`metafields` já existentes como `additionalProperty` do
-      JSON-LD (ver `ToCandidateProduct` em
-      `Tools/BuyerAgentSimulatorTools.cs:114-131`, que não lê `productType`).
-      Para este produto (sem descrição rica, sem metafield de categoria), a
-      otimização não teve como preencher esse requisito — o antes/depois só
-      mostra melhora em catálogos onde a descrição original já carrega dado
-      suficiente para o AI Gateway extrair, ou onde `productType`/categoria
-      vira estrutura nova. Vale investigar se isso é esperado (talvez o
-      catálogo de teste do MVP precise de produtos com descrição mais rica)
-      ou se falta mapear `productType` para um additionalProperty na geração
+      **Achado (na época)**: atribuído a `generate_optimized_content` não criar
+      option/metafield novo para "tipo de produto", e a `ToCandidateProduct`
+      não ler `productType`.
+
+      **Resolvido — atualização de 04/08/2026.** O diagnóstico estava só
+      metade certo, e a metade mecânica foi corrigida:
+      `ToCandidateProduct` (`Tools/BuyerAgentSimulatorTools.cs:120-181`) hoje lê
+      todas as fontes estruturadas — `Options`, `Metafields`,
+      `GeneratedProperties`, e os fallbacks `ProductType` ("Tipo de produto") e
+      `DescriptionHtml` ("Descrição"). O nome `"Tipo de produto"` está ancorado
+      nos dois lados: constante em `BuyerAgentSimulatorTools.cs:187` e regra
+      explícita no prompt de extração de requisitos. E `ContentGenerationResult`
+      passou a devolver `OptimizedCatalog` no mesmo shape que
+      `simulate_buyer_agent` consome, então a rodada "depois" roda de verdade
+      contra a versão otimizada.
+
+      **O que continua verdade**: a geração só extrai o que já está na
+      descrição — ela nunca inventa (ver o prompt em
+      `Tools/ContentGenerationTools.cs`). Um produto com `descriptionHtml`
+      vazio, como este snowboard de seed, continua sem nada a estruturar. É
+      exatamente por isso que o catálogo de demo do ticket 02 foi curado com
+      prosa de marketing corrida: o fato está no texto, só não está em campo.
+
+      **O risco que sobra** não é este, é o **alinhamento de vocabulário**: a
+      extração de requisitos e a geração de specs são duas chamadas de LLM
+      independentes, e o filtro casa nome de atributo por igualdade. Fora de
+      `"Tipo de produto"`, nada garante que as duas escolham a mesma string.
 - [x] **`publish_suggestion` (ticket 07)** — item criado no Task Board:
       id `board_kY--IB4lSiaArT96dnZLb`, status `triage`, título "[GEO]
       Otimizar conteúdo da PDP the-collection-snowboard-liquid". Fica

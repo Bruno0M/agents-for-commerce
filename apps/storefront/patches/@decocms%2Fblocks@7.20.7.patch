@@ -1,6 +1,9 @@
 diff --git a/node_modules/@decocms/blocks/.bun-tag-18da87f222cee1cd b/.bun-tag-18da87f222cee1cd
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/@decocms/blocks/.bun-tag-86443d8bdcf7484a b/.bun-tag-86443d8bdcf7484a
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/src/hooks/Image.tsx b/src/hooks/Image.tsx
 index 8023fdb5f0822be532f7c4f0f28260017eaebbc6..2e9391fab68d7e9783a5da97ffc0ef6f66e55b94 100644
 --- a/src/hooks/Image.tsx
@@ -86,3 +89,203 @@ index 8023fdb5f0822be532f7c4f0f28260017eaebbc6..2e9391fab68d7e9783a5da97ffc0ef6f
  	const resolvedSizes = srcSet ? (sizes ?? "(max-width: 768px) 100vw, 50vw") : undefined;
  
  	return (
+diff --git a/src/hooks/JsonLd.tsx b/src/hooks/JsonLd.tsx
+index eee6efcf4b167fd8ae18ea32d26dde405caacbe0..ac4dc723498c6f9e656b91b7e6b479d205996c5f 100644
+--- a/src/hooks/JsonLd.tsx
++++ b/src/hooks/JsonLd.tsx
+@@ -2,15 +2,16 @@
+  * SEO JSON-LD structured data components.
+  *
+  * Generates JSON-LD script tags for Product (PDP), ProductList (PLP),
+- * and BreadcrumbList schemas. Compatible with Google's Rich Results
+- * requirements.
++ * BreadcrumbList, and FAQPage schemas. Compatible with Google's Rich
++ * Results requirements.
+  *
+  * @example
+  * ```tsx
+- * import { ProductJsonLd, PLPJsonLd, BreadcrumbJsonLd } from "@decocms/blocks/hooks";
++ * import { ProductJsonLd, PLPJsonLd, BreadcrumbJsonLd, FAQPageJsonLd } from "@decocms/blocks/hooks";
+  *
+  * // In a PDP route
+  * <ProductJsonLd product={product} />
++ * <FAQPageJsonLd questions={product.questions} />
+  *
+  * // In a PLP route
+  * <PLPJsonLd page={productListingPage} />
+@@ -74,6 +75,20 @@ interface JsonLdBrand {
+ 	name?: string;
+ }
+ 
++interface JsonLdPropertyValue {
++	name?: string;
++	value?: string | number | boolean;
++	unitCode?: string;
++	unitText?: string;
++}
++
++interface JsonLdProductGroup {
++	productGroupID?: string;
++	url?: string;
++	name?: string;
++	hasVariant?: JsonLdProduct[];
++}
++
+ export interface JsonLdProduct {
+ 	name?: string;
+ 	description?: string;
+@@ -85,6 +100,22 @@ export interface JsonLdProduct {
+ 	image?: JsonLdImage[] | null;
+ 	offers?: JsonLdOffer[] | JsonLdAggregateOffer;
+ 	aggregateRating?: JsonLdAggregateRating;
++	/** Extra spec/feature pairs (options, description, product type, metafields, ...). */
++	additionalProperty?: JsonLdPropertyValue[];
++	/** The product group (with sibling variants) this product belongs to, if any. */
++	isVariantOf?: JsonLdProductGroup | null;
++	/** FAQ entries for this product, if any. Rendered separately via {@link FAQPageJsonLd}. */
++	questions?: JsonLdQuestion[];
++}
++
++export interface JsonLdAnswer {
++	text?: string;
++}
++
++export interface JsonLdQuestion {
++	name?: string;
++	text?: string;
++	acceptedAnswer?: JsonLdAnswer | null;
+ }
+ 
+ interface JsonLdSeo {
+@@ -173,6 +204,46 @@ function _getListPrice(priceSpec: JsonLdPriceSpecification[] | undefined): numbe
+ 	return list?.price;
+ }
+ 
++function toJsonLdPropertyValueList(
++	properties: JsonLdPropertyValue[] | undefined,
++): Record<string, unknown>[] | undefined {
++	const items = (properties ?? [])
++		.filter((prop) => prop.name && prop.value != null && prop.value !== "")
++		.map((prop) => ({
++			"@type": "PropertyValue",
++			name: prop.name,
++			value: prop.value,
++			unitCode: prop.unitCode,
++			unitText: prop.unitText,
++		}));
++
++	return items.length > 0 ? items : undefined;
++}
++
++function toJsonLdVariant(variant: JsonLdProduct): Record<string, unknown> {
++	const offer = getBestOffer(variant.offers);
++	const images = variant.image?.map((img) => img.url).filter(Boolean) ?? [];
++
++	return {
++		"@type": "Product",
++		name: variant.name,
++		sku: variant.sku,
++		productID: variant.productID,
++		url: variant.url,
++		image: images.length > 0 ? (images.length === 1 ? images[0] : images) : undefined,
++		additionalProperty: toJsonLdPropertyValueList(variant.additionalProperty),
++		offers:
++			offer.price != null
++				? {
++						"@type": "Offer",
++						price: offer.price,
++						priceCurrency: offer.priceCurrency ?? "BRL",
++						availability: offer.availability ?? "https://schema.org/InStock",
++					}
++				: undefined,
++	};
++}
++
+ export function ProductJsonLd({ product, url }: ProductJsonLdProps) {
+ 	const offer = getBestOffer(product.offers);
+ 	const images = product.image?.map((img) => img.url).filter(Boolean) ?? [];
+@@ -189,8 +260,20 @@ export function ProductJsonLd({ product, url }: ProductJsonLdProps) {
+ 		productID: product.productID,
+ 		brand: product.brand ? { "@type": "Brand", name: product.brand.name } : undefined,
+ 		gtin: product.gtin,
++		additionalProperty: toJsonLdPropertyValueList(product.additionalProperty),
+ 	};
+ 
++	if (product.isVariantOf) {
++		const group = product.isVariantOf;
++		data.isVariantOf = {
++			"@type": "ProductGroup",
++			productGroupID: group.productGroupID,
++			url: group.url,
++			name: group.name,
++			hasVariant: (group.hasVariant ?? []).map(toJsonLdVariant),
++		};
++	}
++
+ 	if (offer.price != null) {
+ 		data.offers = {
+ 			"@type": "Offer",
+@@ -216,6 +299,42 @@ export function ProductJsonLd({ product, url }: ProductJsonLdProps) {
+ 	return <JsonLdScript data={data} />;
+ }
+ 
++// -------------------------------------------------------------------------
++// FAQ (PDP)
++// -------------------------------------------------------------------------
++
++export interface FAQPageJsonLdProps {
++	questions?: JsonLdQuestion[];
++}
++
++/**
++ * Renders a schema.org `FAQPage` script tag from a product's FAQ entries.
++ * Entries without both a question and an accepted answer are dropped;
++ * renders nothing if no valid entry remains.
++ */
++export function FAQPageJsonLd({ questions }: FAQPageJsonLdProps) {
++	const items = (questions ?? [])
++		.filter((q) => (q.name || q.text) && q.acceptedAnswer?.text)
++		.map((q) => ({
++			"@type": "Question",
++			name: q.name ?? q.text,
++			acceptedAnswer: {
++				"@type": "Answer",
++				text: q.acceptedAnswer!.text,
++			},
++		}));
++
++	if (items.length === 0) return null;
++
++	const data = {
++		"@context": "https://schema.org",
++		"@type": "FAQPage",
++		mainEntity: items,
++	};
++
++	return <JsonLdScript data={data} />;
++}
++
+ // -------------------------------------------------------------------------
+ // Product Listing Page (PLP)
+ // -------------------------------------------------------------------------
+diff --git a/src/hooks/index.ts b/src/hooks/index.ts
+index f3470d17c9a30cc48a62f950891619aa0fc4c7fc..77efe6116e75a4d9e85e382d65f2bcc008f8c381 100644
+--- a/src/hooks/index.ts
++++ b/src/hooks/index.ts
+@@ -19,12 +19,16 @@ export {
+ 	ProductJsonLd,
+ 	PLPJsonLd,
+ 	BreadcrumbJsonLd,
++	FAQPageJsonLd,
+ 	seoMetaTags,
+ 	type ProductJsonLdProps,
+ 	type PLPJsonLdProps,
+ 	type BreadcrumbJsonLdProps,
++	type FAQPageJsonLdProps,
+ 	type SeoMetaProps,
+ 	type JsonLdProduct,
+ 	type JsonLdProductListingPage,
+ 	type JsonLdBreadcrumbList,
++	type JsonLdQuestion,
++	type JsonLdAnswer,
+ } from "./JsonLd";

@@ -13,12 +13,11 @@ O vídeo tem fontes conflitantes de duração: a seção de regras e o vídeo de
 
 O README precisa carregar a metodologia do número (mesmo catálogo, mesmos pedidos, mesma seed, definição de sucesso) — número não reproduzível é pior que número baixo. E o pitch não deve afirmar que preenchemos um buraco do produto da deco: não há nenhuma tool, schema ou menção a GEO no código aberto do Studio.
 
-**Blocked by:** 04, 07.
+**Blocked by:** 04, 07, 16, 18.
 
 **Status:** ready-for-agent
 
 - [ ] O repositório está público e o README explica problema, solução, arquitetura e metodologia do número
-- [ ] `apps/mcp-app/` não é mais um repo git aninhado — ou o `.git` interno saiu e o código está commitado, ou o diretório saiu do repo
 - [ ] O produto `gift-card` padrão da Shopify está arquivado, para a vitrine da gravação mostrar só os 7 de áudio
 - [ ] A lista de ferramentas usadas está no README
 - [ ] O vídeo demo está gravado, mostrando: catálogo pobre → auditoria → geração → rodada antes/depois com o número → aprovação humana no Task Board → PDP publicada com JSON-LD

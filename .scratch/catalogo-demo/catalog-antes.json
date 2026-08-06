@@ -1,0 +1,248 @@
+{
+  "_meta": {
+    "description": "Congelamento do catálogo 'antes' — foto imutável do estado da loja antes de qualquer escrita da 08 (metafields) ou geração da 05. Ver .scratch/entrega-hackathon/issues/17-congelar-catalogo-antes.md.",
+    "capturedAt": "2026-08-06T02:15:25Z",
+    "capturedAgainst": "afc-store-o7xzc4c2.myshopify.com",
+    "capturedVia": "get_product_content (apps/mcp-server/Tools/CatalogReadTools.cs) — um request por handle",
+    "catalogSpec": ".scratch/catalogo-demo/spec.md",
+    "handles": [
+      "aurora-nc7",
+      "vetor-studio-one",
+      "halo-air-pro",
+      "corvo-sport-2",
+      "orbe-link-4",
+      "nimbo-mini",
+      "vetor-reference-900"
+    ],
+    "verifiedAgainstTicket02": "Bate com o comentário de verificação de 04/08/2026 em .scratch/entrega-hackathon/issues/02-catalogo-demo-publicado.md: metafields: [] e hasSchemaOrgMarkup: false nos 7, Cor é a única option em todos."
+  },
+  "products": [
+    {
+      "id": "gid://shopify/Product/9291231854804",
+      "handle": "aurora-nc7",
+      "title": "Aurora NC7",
+      "descriptionHtml": "<p>O Aurora NC7 começou com uma pergunta chata: por que cancelamento de ruído ativo precisa custar o preço de um celular? Colocamos captação por microfone duplo no mesmo padrão de modelos três vezes mais caros, e o silêncio aparece no primeiro segundo — no busão, no open space, no voo das seis da manhã.</p>\n<p>O estojo recarrega o fone quase três vezes, o que na prática dá 28 horas longe da tomada. Esqueceu de carregar? Dez minutos na base devolvem cerca de duas horas de música. O Bluetooth 5.3 mantém dois aparelhos conectados ao mesmo tempo, então a reunião que entra no notebook não briga com o que está tocando no celular.</p>\n<p>São 4,8 g em cada lado, certificação IPX4 para chuva leve e treino puxado, e três tamanhos de ponteira na caixa até você achar a vedação certa. Transmissão em AAC e SBC.</p>",
+      "vendor": "Aurora",
+      "productType": "Fones de ouvido",
+      "status": "ACTIVE",
+      "tags": ["anc", "bluetooth", "tws"],
+      "onlineStoreUrl": null,
+      "options": [{ "name": "Cor", "values": ["Preto", "Areia"] }],
+      "variants": [
+        {
+          "id": "gid://shopify/ProductVariant/48422578651348",
+          "title": "Preto",
+          "sku": null,
+          "price": "289.00",
+          "availableForSale": true,
+          "inventoryQuantity": 0,
+          "selectedOptions": [{ "name": "Cor", "value": "Preto" }]
+        },
+        {
+          "id": "gid://shopify/ProductVariant/48422578684116",
+          "title": "Areia",
+          "sku": null,
+          "price": "289.00",
+          "availableForSale": true,
+          "inventoryQuantity": 0,
+          "selectedOptions": [{ "name": "Cor", "value": "Areia" }]
+        }
+      ],
+      "metafields": [],
+      "hasSchemaOrgMarkup": false,
+      "generatedProperties": []
+    },
+    {
+      "id": "gid://shopify/Product/9291232248020",
+      "handle": "vetor-studio-one",
+      "title": "Vetor Studio One",
+      "descriptionHtml": "<p>O Studio One é o fone que a gente queria ter quando começou a mixar em casa. Concha fechada que abraça a orelha inteira, driver de 40 mm com resposta que não infla o grave pra impressionar, e cancelamento de ruído ativo que você liga quando o vizinho resolve furar a parede.</p>\n<p>A autonomia é o ponto em que ele não tem concorrente na faixa: 40 horas com o ANC ligado. Dá pra atravessar uma semana de trabalho sem lembrar que ele tem bateria. Carrega por USB-C e aceita cabo P2 se acabar de vez.</p>\n<p>Pesa 265 g, com haste de aço e espuma com memória revestida em couro sintético. Conecta por Bluetooth 5.2 — um aparelho por vez, então se você alterna entre notebook e celular o tempo todo, vale olhar o Reference 900. Não tem proteção contra água: esse é fone de mesa, não de corrida.</p>",
+      "vendor": "Vetor",
+      "productType": "Fones de ouvido",
+      "status": "ACTIVE",
+      "tags": ["anc", "bluetooth", "over-ear"],
+      "onlineStoreUrl": null,
+      "options": [{ "name": "Cor", "values": ["Preto"] }],
+      "variants": [
+        {
+          "id": "gid://shopify/ProductVariant/48422580060372",
+          "title": "Preto",
+          "sku": null,
+          "price": "279.00",
+          "availableForSale": true,
+          "inventoryQuantity": 0,
+          "selectedOptions": [{ "name": "Cor", "value": "Preto" }]
+        }
+      ],
+      "metafields": [],
+      "hasSchemaOrgMarkup": false,
+      "generatedProperties": []
+    },
+    {
+      "id": "gid://shopify/Product/9291232379092",
+      "handle": "halo-air-pro",
+      "title": "Halo Air Pro",
+      "descriptionHtml": "<p>O Air Pro é para quem escutou um arquivo em alta resolução uma vez e não conseguiu mais voltar. Ele fala LDAC, o que significa que o áudio chega no seu ouvido com muito mais informação do que o Bluetooth comum entrega — e a diferença aparece nos discos que você já conhece de cor.</p>\n<p>O cancelamento de ruído ativo tem três níveis e um modo ambiente que deixa a voz do atendente passar sem tirar o fone. Bluetooth 5.3, com dois aparelhos pareados ao mesmo tempo.</p>\n<p>São 22 horas contando o estojo, o suficiente para a semana de escritório com uma recarga no meio. Cada lado tem 5,2 g e certificação IPX5, então chuva de verdade não é problema.</p>",
+      "vendor": "Halo",
+      "productType": "Fones de ouvido",
+      "status": "ACTIVE",
+      "tags": ["anc", "bluetooth", "ldac", "tws"],
+      "onlineStoreUrl": null,
+      "options": [{ "name": "Cor", "values": ["Grafite", "Azul-noite"] }],
+      "variants": [
+        {
+          "id": "gid://shopify/ProductVariant/48422580945108",
+          "title": "Grafite",
+          "sku": null,
+          "price": "299.00",
+          "availableForSale": true,
+          "inventoryQuantity": 0,
+          "selectedOptions": [{ "name": "Cor", "value": "Grafite" }]
+        },
+        {
+          "id": "gid://shopify/ProductVariant/48422580977876",
+          "title": "Azul-noite",
+          "sku": null,
+          "price": "299.00",
+          "availableForSale": true,
+          "inventoryQuantity": 0,
+          "selectedOptions": [{ "name": "Cor", "value": "Azul-noite" }]
+        }
+      ],
+      "metafields": [],
+      "hasSchemaOrgMarkup": false,
+      "generatedProperties": []
+    },
+    {
+      "id": "gid://shopify/Product/9291232608468",
+      "handle": "corvo-sport-2",
+      "title": "Corvo Sport 2",
+      "descriptionHtml": "<p>O Sport 2 foi feito para uma coisa só: não cair da sua orelha. A aleta de silicone trava na concha e continua lá no sprint, no burpee e no décimo quilômetro. Testamos com corredores de rua por seis meses antes de liberar.</p>\n<p>Certificação IPX7 — ele aguenta ser submerso, então suor e chuva forte são detalhe. Passe em água corrente depois do treino, sem medo.</p>\n<p>A bateria dura 32 horas com o estojo, o que dá mais de um mês de treinos para a maioria das pessoas. Conecta por Bluetooth 5.2 e emenda dois aparelhos ao mesmo tempo.</p>\n<p>Ele não tem cancelamento de ruído ativo, e isso foi decisão de projeto: quem corre na rua precisa ouvir o carro chegando. O isolamento é passivo, o da própria ponteira.</p>",
+      "vendor": "Corvo",
+      "productType": "Fones de ouvido",
+      "status": "ACTIVE",
+      "tags": ["bluetooth", "esportivo", "tws"],
+      "onlineStoreUrl": null,
+      "options": [{ "name": "Cor", "values": ["Preto", "Verde-limão"] }],
+      "variants": [
+        {
+          "id": "gid://shopify/ProductVariant/48422581141716",
+          "title": "Preto",
+          "sku": null,
+          "price": "189.00",
+          "availableForSale": true,
+          "inventoryQuantity": 0,
+          "selectedOptions": [{ "name": "Cor", "value": "Preto" }]
+        },
+        {
+          "id": "gid://shopify/ProductVariant/48422581174484",
+          "title": "Verde-limão",
+          "sku": null,
+          "price": "189.00",
+          "availableForSale": true,
+          "inventoryQuantity": 0,
+          "selectedOptions": [{ "name": "Cor", "value": "Verde-limão" }]
+        }
+      ],
+      "metafields": [],
+      "hasSchemaOrgMarkup": false,
+      "generatedProperties": []
+    },
+    {
+      "id": "gid://shopify/Product/9291232641236",
+      "handle": "orbe-link-4",
+      "title": "Orbe Link 4",
+      "descriptionHtml": "<p>O Link 4 é o fone de dobrar e enfiar na mochila. Concha on-ear que apoia sobre a orelha em vez de envolver, arco que fecha em três partes e cabe no bolso do casaco. Prata escovado com detalhe em couro.</p>\n<p>Tem cancelamento de ruído ativo — modesto, mas resolve o zumbido do ar-condicionado e o ruído do metrô. Bluetooth 5.1.</p>\n<p>A autonomia é de 14 horas, e a gente prefere ser honesto sobre isso: é um fone de trajeto e reunião, não de viagem longa. Carrega por USB-C em pouco mais de uma hora. Certificação IPX4 dá conta de garoa.</p>",
+      "vendor": "Orbe",
+      "productType": "Fones de ouvido",
+      "status": "ACTIVE",
+      "tags": ["anc", "bluetooth", "on-ear"],
+      "onlineStoreUrl": null,
+      "options": [{ "name": "Cor", "values": ["Prata"] }],
+      "variants": [
+        {
+          "id": "gid://shopify/ProductVariant/48422581240020",
+          "title": "Prata",
+          "sku": null,
+          "price": "249.00",
+          "availableForSale": true,
+          "inventoryQuantity": 0,
+          "selectedOptions": [{ "name": "Cor", "value": "Prata" }]
+        }
+      ],
+      "metafields": [],
+      "hasSchemaOrgMarkup": false,
+      "generatedProperties": []
+    },
+    {
+      "id": "gid://shopify/Product/9291232674004",
+      "handle": "nimbo-mini",
+      "title": "Nimbo Mini",
+      "descriptionHtml": "<p>O Nimbo Mini é o primeiro fone sem fio de muita gente, e a gente projetou pensando exatamente nisso. Pareia apertando um botão, toca por 18 horas e não pede mais nada de você.</p>\n<p>Driver de 32 mm com um grave generoso, do tipo que funciona bem em pop e funk. Bluetooth 5.0, alcance de uns dez metros dentro de casa.</p>\n<p>Não espere cancelamento de ruído ativo nem resistência à água nesta faixa — é um fone honesto de casa e escritório, com 190 g e almofada de espuma que você troca quando gastar.</p>",
+      "vendor": "Nimbo",
+      "productType": "Fones de ouvido",
+      "status": "ACTIVE",
+      "tags": ["bluetooth", "entrada", "on-ear"],
+      "onlineStoreUrl": null,
+      "options": [{ "name": "Cor", "values": ["Preto", "Vermelho"] }],
+      "variants": [
+        {
+          "id": "gid://shopify/ProductVariant/48422581305556",
+          "title": "Preto",
+          "sku": null,
+          "price": "149.00",
+          "availableForSale": true,
+          "inventoryQuantity": 0,
+          "selectedOptions": [{ "name": "Cor", "value": "Preto" }]
+        },
+        {
+          "id": "gid://shopify/ProductVariant/48422581338324",
+          "title": "Vermelho",
+          "sku": null,
+          "price": "149.00",
+          "availableForSale": true,
+          "inventoryQuantity": 0,
+          "selectedOptions": [{ "name": "Cor", "value": "Vermelho" }]
+        }
+      ],
+      "metafields": [],
+      "hasSchemaOrgMarkup": false,
+      "generatedProperties": []
+    },
+    {
+      "id": "gid://shopify/Product/9291232739540",
+      "handle": "vetor-reference-900",
+      "title": "Vetor Reference 900",
+      "descriptionHtml": "<p>O Reference 900 é o topo da linha Vetor e não pede desculpa por isso. Estrutura em alumínio usinado, concha over-ear em couro de verdade e driver de 45 mm com diafragma de fibra de carbono — a curva de resposta sai calibrada uma a uma na fábrica, e a folha de medição vem na caixa.</p>\n<p>São oito microfones fazendo o cancelamento de ruído ativo, com ajuste automático conforme a pressão da cabine em voo. É o silêncio mais completo que já colocamos num produto.</p>\n<p>A bateria entrega 60 horas com o ANC ligado. Fala LDAC e aptX Adaptive, mantém três aparelhos conectados ao mesmo tempo e troca entre eles sozinho quando um começa a tocar. Pesa 330 g, apesar do alumínio.</p>",
+      "vendor": "Vetor",
+      "productType": "Fones de ouvido",
+      "status": "ACTIVE",
+      "tags": ["anc", "bluetooth", "ldac", "over-ear", "premium"],
+      "onlineStoreUrl": null,
+      "options": [{ "name": "Cor", "values": ["Preto", "Grafite"] }],
+      "variants": [
+        {
+          "id": "gid://shopify/ProductVariant/48422581928148",
+          "title": "Preto",
+          "sku": null,
+          "price": "1290.00",
+          "availableForSale": true,
+          "inventoryQuantity": 0,
+          "selectedOptions": [{ "name": "Cor", "value": "Preto" }]
+        },
+        {
+          "id": "gid://shopify/ProductVariant/48422581960916",
+          "title": "Grafite",
+          "sku": null,
+          "price": "1290.00",
+          "availableForSale": true,
+          "inventoryQuantity": 0,
+          "selectedOptions": [{ "name": "Cor", "value": "Grafite" }]
+        }
+      ],
+      "metafields": [],
+      "hasSchemaOrgMarkup": false,
+      "generatedProperties": []
+    }
+  ]
+}

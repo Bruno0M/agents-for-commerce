@@ -1,0 +1,218 @@
+{
+  "NaturalLanguageOrder": "Quero um fone bluetooth com cancelamento de ru\u00EDdo ativo, at\u00E9 R$ 300, e que a bateria dure pelo menos 20 horas.",
+  "AttributeRequirements": [
+    {
+      "AttributeName": "Tipo de produto",
+      "ExpectedValue": "fone"
+    },
+    {
+      "AttributeName": "Cancelamento de ru\u00EDdo",
+      "ExpectedValue": "ativo"
+    }
+  ],
+  "NumericMinimumRequirements": [
+    {
+      "AttributeName": "Bateria",
+      "MinValue": 20.0,
+      "Unit": "h"
+    }
+  ],
+  "MaxPrice": 300.0,
+  "Products": [
+    {
+      "ProductId": "gid://shopify/Product/9291231854804",
+      "Handle": "aurora-nc7",
+      "Title": "Aurora NC7",
+      "ExpectedToPass": true,
+      "PassedBefore": false,
+      "PassedAfter": true,
+      "CorrectlyClassifiedBefore": false,
+      "CorrectlyClassifiedAfter": true,
+      "ConfirmedRequirementsBefore": [
+        "\u0027Tipo de produto\u0027 = \u0027Fones de ouvido\u0027.",
+        "Pre\u00E7o \u00A4289.00 dentro do limite de \u00A4300.00."
+      ],
+      "UnmetRequirementsBefore": [
+        "Sem dado estruturado para confirmar \u0027Cancelamento de ru\u00EDdo\u0027.",
+        "Sem dado estruturado para confirmar \u0027Bateria\u0027 (m\u00EDnimo 20.0h)."
+      ],
+      "ConfirmedRequirementsAfter": [
+        "\u0027Tipo de produto\u0027 = \u0027Fones de ouvido\u0027.",
+        "\u0027Cancelamento de ru\u00EDdo\u0027 = \u0027Ativo, com capta\u00E7\u00E3o por microfone duplo\u0027.",
+        "\u0027Bateria\u0027 = \u002728h\u0027 (m\u00EDnimo 20.0h).",
+        "Pre\u00E7o \u00A4289.00 dentro do limite de \u00A4300.00."
+      ],
+      "UnmetRequirementsAfter": []
+    },
+    {
+      "ProductId": "gid://shopify/Product/9291232248020",
+      "Handle": "vetor-studio-one",
+      "Title": "Vetor Studio One",
+      "ExpectedToPass": true,
+      "PassedBefore": false,
+      "PassedAfter": true,
+      "CorrectlyClassifiedBefore": false,
+      "CorrectlyClassifiedAfter": true,
+      "ConfirmedRequirementsBefore": [
+        "\u0027Tipo de produto\u0027 = \u0027Fones de ouvido\u0027.",
+        "Pre\u00E7o \u00A4279.00 dentro do limite de \u00A4300.00."
+      ],
+      "UnmetRequirementsBefore": [
+        "Sem dado estruturado para confirmar \u0027Cancelamento de ru\u00EDdo\u0027.",
+        "Sem dado estruturado para confirmar \u0027Bateria\u0027 (m\u00EDnimo 20.0h)."
+      ],
+      "ConfirmedRequirementsAfter": [
+        "\u0027Tipo de produto\u0027 = \u0027Fones de ouvido\u0027.",
+        "\u0027Cancelamento de ru\u00EDdo\u0027 = \u0027Ativo (ANC)\u0027.",
+        "\u0027Bateria\u0027 = \u002740h\u0027 (m\u00EDnimo 20.0h).",
+        "Pre\u00E7o \u00A4279.00 dentro do limite de \u00A4300.00."
+      ],
+      "UnmetRequirementsAfter": []
+    },
+    {
+      "ProductId": "gid://shopify/Product/9291232379092",
+      "Handle": "halo-air-pro",
+      "Title": "Halo Air Pro",
+      "ExpectedToPass": true,
+      "PassedBefore": false,
+      "PassedAfter": true,
+      "CorrectlyClassifiedBefore": false,
+      "CorrectlyClassifiedAfter": true,
+      "ConfirmedRequirementsBefore": [
+        "\u0027Tipo de produto\u0027 = \u0027Fones de ouvido\u0027.",
+        "Pre\u00E7o \u00A4299.00 dentro do limite de \u00A4300.00."
+      ],
+      "UnmetRequirementsBefore": [
+        "Sem dado estruturado para confirmar \u0027Cancelamento de ru\u00EDdo\u0027.",
+        "Sem dado estruturado para confirmar \u0027Bateria\u0027 (m\u00EDnimo 20.0h)."
+      ],
+      "ConfirmedRequirementsAfter": [
+        "\u0027Tipo de produto\u0027 = \u0027Fones de ouvido\u0027.",
+        "\u0027Cancelamento de ru\u00EDdo\u0027 = \u0027Ativo, com tr\u00EAs n\u00EDveis e modo ambiente\u0027.",
+        "\u0027Bateria\u0027 = \u002722h\u0027 (m\u00EDnimo 20.0h).",
+        "Pre\u00E7o \u00A4299.00 dentro do limite de \u00A4300.00."
+      ],
+      "UnmetRequirementsAfter": []
+    },
+    {
+      "ProductId": "gid://shopify/Product/9291232608468",
+      "Handle": "corvo-sport-2",
+      "Title": "Corvo Sport 2",
+      "ExpectedToPass": false,
+      "PassedBefore": false,
+      "PassedAfter": false,
+      "CorrectlyClassifiedBefore": true,
+      "CorrectlyClassifiedAfter": true,
+      "ConfirmedRequirementsBefore": [
+        "\u0027Tipo de produto\u0027 = \u0027Fones de ouvido\u0027.",
+        "Pre\u00E7o \u00A4189.00 dentro do limite de \u00A4300.00."
+      ],
+      "UnmetRequirementsBefore": [
+        "Sem dado estruturado para confirmar \u0027Cancelamento de ru\u00EDdo\u0027.",
+        "Sem dado estruturado para confirmar \u0027Bateria\u0027 (m\u00EDnimo 20.0h)."
+      ],
+      "ConfirmedRequirementsAfter": [
+        "\u0027Tipo de produto\u0027 = \u0027Fones de ouvido\u0027.",
+        "\u0027Bateria\u0027 = \u002732h\u0027 (m\u00EDnimo 20.0h).",
+        "Pre\u00E7o \u00A4189.00 dentro do limite de \u00A4300.00."
+      ],
+      "UnmetRequirementsAfter": [
+        "\u0027Cancelamento de ru\u00EDdo\u0027 = \u0027N\u00E3o possui cancelamento ativo (isolamento passivo)\u0027 n\u00E3o confirma \u0027ativo\u0027."
+      ]
+    },
+    {
+      "ProductId": "gid://shopify/Product/9291232641236",
+      "Handle": "orbe-link-4",
+      "Title": "Orbe Link 4",
+      "ExpectedToPass": false,
+      "PassedBefore": false,
+      "PassedAfter": false,
+      "CorrectlyClassifiedBefore": true,
+      "CorrectlyClassifiedAfter": true,
+      "ConfirmedRequirementsBefore": [
+        "\u0027Tipo de produto\u0027 = \u0027Fones de ouvido\u0027.",
+        "Pre\u00E7o \u00A4249.00 dentro do limite de \u00A4300.00."
+      ],
+      "UnmetRequirementsBefore": [
+        "Sem dado estruturado para confirmar \u0027Cancelamento de ru\u00EDdo\u0027.",
+        "Sem dado estruturado para confirmar \u0027Bateria\u0027 (m\u00EDnimo 20.0h)."
+      ],
+      "ConfirmedRequirementsAfter": [
+        "\u0027Tipo de produto\u0027 = \u0027Fones de ouvido\u0027.",
+        "\u0027Cancelamento de ru\u00EDdo\u0027 = \u0027Ativo (modesto)\u0027.",
+        "Pre\u00E7o \u00A4249.00 dentro do limite de \u00A4300.00."
+      ],
+      "UnmetRequirementsAfter": [
+        "\u0027Bateria\u0027 = \u002714h\u0027 abaixo do m\u00EDnimo de 20.0h."
+      ]
+    },
+    {
+      "ProductId": "gid://shopify/Product/9291232674004",
+      "Handle": "nimbo-mini",
+      "Title": "Nimbo Mini",
+      "ExpectedToPass": false,
+      "PassedBefore": false,
+      "PassedAfter": false,
+      "CorrectlyClassifiedBefore": true,
+      "CorrectlyClassifiedAfter": true,
+      "ConfirmedRequirementsBefore": [
+        "\u0027Tipo de produto\u0027 = \u0027Fones de ouvido\u0027.",
+        "Pre\u00E7o \u00A4149.00 dentro do limite de \u00A4300.00."
+      ],
+      "UnmetRequirementsBefore": [
+        "Sem dado estruturado para confirmar \u0027Cancelamento de ru\u00EDdo\u0027.",
+        "Sem dado estruturado para confirmar \u0027Bateria\u0027 (m\u00EDnimo 20.0h)."
+      ],
+      "ConfirmedRequirementsAfter": [
+        "\u0027Tipo de produto\u0027 = \u0027Fones de ouvido\u0027.",
+        "Pre\u00E7o \u00A4149.00 dentro do limite de \u00A4300.00."
+      ],
+      "UnmetRequirementsAfter": [
+        "\u0027Cancelamento de ru\u00EDdo\u0027 = \u0027N\u00E3o possui\u0027 n\u00E3o confirma \u0027ativo\u0027.",
+        "\u0027Bateria\u0027 = \u002718h\u0027 abaixo do m\u00EDnimo de 20.0h."
+      ]
+    },
+    {
+      "ProductId": "gid://shopify/Product/9291232739540",
+      "Handle": "vetor-reference-900",
+      "Title": "Vetor Reference 900",
+      "ExpectedToPass": false,
+      "PassedBefore": false,
+      "PassedAfter": false,
+      "CorrectlyClassifiedBefore": true,
+      "CorrectlyClassifiedAfter": true,
+      "ConfirmedRequirementsBefore": [
+        "\u0027Tipo de produto\u0027 = \u0027Fones de ouvido\u0027."
+      ],
+      "UnmetRequirementsBefore": [
+        "Sem dado estruturado para confirmar \u0027Cancelamento de ru\u00EDdo\u0027.",
+        "Sem dado estruturado para confirmar \u0027Bateria\u0027 (m\u00EDnimo 20.0h).",
+        "Pre\u00E7o \u00A41,290.00 acima do limite de \u00A4300.00."
+      ],
+      "ConfirmedRequirementsAfter": [
+        "\u0027Tipo de produto\u0027 = \u0027Fones de ouvido\u0027.",
+        "\u0027Cancelamento de ru\u00EDdo\u0027 = \u0027Ativo, com 8 microfones e ajuste autom\u00E1tico por press\u00E3o de cabine\u0027.",
+        "\u0027Bateria\u0027 = \u002760h\u0027 (m\u00EDnimo 20.0h)."
+      ],
+      "UnmetRequirementsAfter": [
+        "Pre\u00E7o \u00A41,290.00 acima do limite de \u00A4300.00."
+      ]
+    }
+  ],
+  "Before": {
+    "CorrectlyClassifiedCount": 4,
+    "TotalClassifiedProducts": 7,
+    "SuccessRate": 0.5714285714285714,
+    "ChosenProductTitle": null,
+    "Justification": "Nenhum produto do cat\u00E1logo confirmou todos os requisitos obrigat\u00F3rios com dado estruturado."
+  },
+  "After": {
+    "CorrectlyClassifiedCount": 7,
+    "TotalClassifiedProducts": 7,
+    "SuccessRate": 1,
+    "ChosenProductTitle": "Aurora NC7",
+    "Justification": "\u0027Aurora NC7\u0027 escolhido entre 3 candidatos empatados nos requisitos obrigat\u00F3rios \u2014 sem sinais secund\u00E1rios estruturados suficientes para desempatar por diferencial."
+  },
+  "SuccessRateDeltaCount": 3,
+  "SuccessRateDelta": 0.4285714285714286
+}

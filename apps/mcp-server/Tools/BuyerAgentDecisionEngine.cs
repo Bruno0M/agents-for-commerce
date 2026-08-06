@@ -35,12 +35,12 @@ public static class BuyerAgentDecisionEngine
     // efeito de falta de legibilidade agêntica que a mecânica quer expor).
     private static BuyerFilterOutcome EvaluateProduct(BuyerCandidateProduct product, BuyerOrderRequirements requirements)
     {
+        var confirmedRequirements = new List<string>();
         var unmetRequirements = new List<string>();
 
         foreach (var requirement in requirements.AttributeRequirements)
         {
-            var match = product.StructuredAttributes.FirstOrDefault(attribute =>
-                string.Equals(attribute.Key, requirement.AttributeName, StringComparison.OrdinalIgnoreCase));
+            var match = FindMatchingAttribute(product.StructuredAttributes, requirement.AttributeName);
 
             if (match.Key is null)
             {
@@ -48,11 +48,46 @@ public static class BuyerAgentDecisionEngine
                 continue;
             }
 
-            if (!match.Value.Contains(requirement.ExpectedValue, StringComparison.OrdinalIgnoreCase))
+            if (!ValueConfirms(match.Value, requirement.ExpectedValue))
             {
                 unmetRequirements.Add(
                     $"'{requirement.AttributeName}' = '{match.Value}' não confirma '{requirement.ExpectedValue}'.");
+                continue;
             }
+
+            confirmedRequirements.Add($"'{requirement.AttributeName}' = '{match.Value}'.");
+        }
+
+        foreach (var numericRequirement in requirements.NumericMinimumRequirementsOrEmpty)
+        {
+            var unit = numericRequirement.Unit ?? string.Empty;
+            var minLabel = $"{numericRequirement.MinValue.ToString(CultureInfo.InvariantCulture)}{unit}";
+            var match = FindMatchingAttribute(product.StructuredAttributes, numericRequirement.AttributeName);
+
+            if (match.Key is null)
+            {
+                unmetRequirements.Add(
+                    $"Sem dado estruturado para confirmar '{numericRequirement.AttributeName}' (mínimo {minLabel}).");
+                continue;
+            }
+
+            var extractedValue = ExtractLeadingNumber(match.Value);
+            if (extractedValue is not { } numericValue)
+            {
+                unmetRequirements.Add(
+                    $"'{numericRequirement.AttributeName}' = '{match.Value}' não tem valor numérico reconhecível para confirmar o mínimo de {minLabel}.");
+                continue;
+            }
+
+            if (numericValue < numericRequirement.MinValue)
+            {
+                unmetRequirements.Add(
+                    $"'{numericRequirement.AttributeName}' = '{numericValue.ToString(CultureInfo.InvariantCulture)}{unit}' abaixo do mínimo de {minLabel}.");
+                continue;
+            }
+
+            confirmedRequirements.Add(
+                $"'{numericRequirement.AttributeName}' = '{numericValue.ToString(CultureInfo.InvariantCulture)}{unit}' (mínimo {minLabel}).");
         }
 
         if (requirements.MaxPrice is { } maxPrice)
@@ -67,9 +102,110 @@ public static class BuyerAgentDecisionEngine
                 unmetRequirements.Add(
                     $"Preço {price.ToString("C", CultureInfo.InvariantCulture)} acima do limite de {maxPrice.ToString("C", CultureInfo.InvariantCulture)}.");
             }
+            else
+            {
+                confirmedRequirements.Add(
+                    $"Preço {price.ToString("C", CultureInfo.InvariantCulture)} dentro do limite de {maxPrice.ToString("C", CultureInfo.InvariantCulture)}.");
+            }
         }
 
-        return new BuyerFilterOutcome(product, unmetRequirements.Count == 0, unmetRequirements);
+        return new BuyerFilterOutcome(product, unmetRequirements.Count == 0, confirmedRequirements, unmetRequirements);
+    }
+
+    // Plain substring Contains has a real false-positive: a spec value that factually
+    // *denies* the requirement can still contain the expected word literally — the demo
+    // catalog's own control product states "Não possui cancelamento de ruído ativo" (a
+    // deliberate, justified negative per .scratch/catalogo-demo/spec.md), and that value
+    // contains the literal substring "ativo". Confirmed live: this made a control pass
+    // the "depois" round it must fail. Scope the check to the clause that contains the
+    // match (split on . ; , :) and reject if a negation marker appears in that same
+    // clause — a product-agnostic, no-AI heuristic; it does not attempt full negation
+    // scope resolution beyond clause boundaries.
+    private static bool ValueConfirms(string actualValue, string expectedValue)
+    {
+        var matchIndex = actualValue.IndexOf(expectedValue, StringComparison.OrdinalIgnoreCase);
+        if (matchIndex < 0)
+        {
+            return false;
+        }
+
+        var clauseStart = 0;
+        for (var i = matchIndex - 1; i >= 0; i--)
+        {
+            if (actualValue[i] is '.' or ';' or ',' or ':')
+            {
+                clauseStart = i + 1;
+                break;
+            }
+        }
+
+        var clause = actualValue[clauseStart..];
+        return !NegationMarkers.Any(marker => clause.Contains(marker, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static readonly string[] NegationMarkers = ["não", "nao", "nunca", "nenhum", "nenhuma", "sem "];
+
+    // Requirement extraction (from the order) and property extraction (from the
+    // description, in generate_optimized_content) are two independent LLM calls —
+    // ticket 03's comments flagged this as a structural risk ("Duração da bateria"
+    // vs "Autonomia da bateria" is a real example a live run produced), and ticket 04
+    // hit it on pedido A itself. An exact-key match stays the fast, precise path;
+    // the fallback only fires when it misses, and only requires the two names to
+    // share one significant (non-stopword, >2-char) word — enough to bridge synonym
+    // drift on a single well-known concept without turning into free-text search.
+    // Known limitation (left for ticket 18 to revisit if it bites): with several
+    // distinct attributes sharing a word (e.g. two different "bateria" specs), this
+    // picks whichever the dictionary enumerates first.
+    private static KeyValuePair<string, string> FindMatchingAttribute(
+        IReadOnlyDictionary<string, string> attributes, string requirementName)
+    {
+        var exact = attributes.FirstOrDefault(attribute =>
+            string.Equals(attribute.Key, requirementName, StringComparison.OrdinalIgnoreCase));
+        if (exact.Key is not null)
+        {
+            return exact;
+        }
+
+        var requirementWords = SignificantWords(requirementName);
+        if (requirementWords.Count == 0)
+        {
+            return default;
+        }
+
+        return attributes.FirstOrDefault(attribute => SignificantWords(attribute.Key).Overlaps(requirementWords));
+    }
+
+    private static readonly HashSet<string> PortugueseStopWords = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "de", "da", "do", "das", "dos", "e", "a", "o", "as", "os", "com", "para", "em", "no", "na",
+    };
+
+    private static HashSet<string> SignificantWords(string text) => new(
+        text.Split([' ', '-', '/'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(word => word.Length > 2 && !PortugueseStopWords.Contains(word)),
+        StringComparer.OrdinalIgnoreCase);
+
+    // Buyer-facing spec values are prose ("Até 28 horas com o estojo de recarga"),
+    // not bare numbers — pulls the first decimal/integer out to compare against a
+    // BuyerNumericMinimumRequirement. Only the leading number is used by design: a
+    // spec sentence leads with the number that matters (see the demo catalog's own
+    // convention in .scratch/catalogo-demo/spec.md), and picking a single
+    // unambiguous number is safer than trying to guess among several.
+    private static decimal? ExtractLeadingNumber(string value)
+    {
+        var match = System.Text.RegularExpressions.Regex.Match(value, @"\d+(?:[.,]\d+)?");
+        if (!match.Success)
+        {
+            return null;
+        }
+
+        return decimal.TryParse(
+            match.Value.Replace(",", ".", StringComparison.Ordinal),
+            NumberStyles.Any,
+            CultureInfo.InvariantCulture,
+            out var result)
+            ? result
+            : null;
     }
 
     // Etapa 2: compara os candidatos remanescentes por sinais secundários genéricos
@@ -154,12 +290,26 @@ public static class BuyerAgentDecisionEngine
 /// extração sem abrir mão do "aplicado à risca" (ainda exige que o dado exista).</summary>
 public sealed record BuyerAttributeRequirement(string AttributeName, string ExpectedValue);
 
+/// <summary>Um requisito de mínimo numérico extraído do pedido (ex: "pelo menos 20
+/// horas de bateria") — tratado à parte de <see cref="BuyerAttributeRequirement"/>
+/// porque uma comparação "≥" não pode ser expressa como confirmação de substring: o
+/// valor estruturado do produto é prosa ("Até 28 horas com o estojo"), não um número
+/// isolado, e a exigência é sobre a grandeza, não sobre casar o texto do pedido.
+/// <see cref="Unit"/> é só para exibição (ex: "h") — a comparação em si é numérica.</summary>
+public sealed record BuyerNumericMinimumRequirement(string AttributeName, decimal MinValue, string? Unit = null);
+
 /// <summary>Requisitos obrigatórios extraídos de um pedido em linguagem natural
-/// (etapa 1 da mecânica). <see cref="MaxPrice"/> é tratado à parte por ser uma
-/// restrição numérica (limite), não uma confirmação de valor exato.</summary>
+/// (etapa 1 da mecânica). <see cref="MaxPrice"/> e <see cref="NumericMinimumRequirements"/>
+/// são tratados à parte por serem restrições numéricas (limite/mínimo), não
+/// confirmação de valor exato.</summary>
 public sealed record BuyerOrderRequirements(
     IReadOnlyList<BuyerAttributeRequirement> AttributeRequirements,
-    decimal? MaxPrice = null);
+    decimal? MaxPrice = null,
+    IReadOnlyList<BuyerNumericMinimumRequirement>? NumericMinimumRequirements = null)
+{
+    public IReadOnlyList<BuyerNumericMinimumRequirement> NumericMinimumRequirementsOrEmpty =>
+        NumericMinimumRequirements ?? [];
+}
 
 public enum BuyerSignalDirection
 {
@@ -184,12 +334,15 @@ public sealed record BuyerCandidateProduct(
     IReadOnlyDictionary<string, string> StructuredAttributes,
     IReadOnlyList<BuyerSecondarySignal> SecondarySignals);
 
-/// <summary>Resultado da avaliação de um produto na etapa 1: se passou e, quando não
-/// passou, a lista de requisitos que não puderam ser confirmados — serve tanto para a
-/// tool devolver transparência ao caller quanto para depurar testes.</summary>
+/// <summary>Resultado da avaliação de um produto na etapa 1: se passou, os requisitos
+/// que o dado estruturado confirmou e, quando não passou, a lista dos que não puderam
+/// ser confirmados — serve tanto para a tool devolver transparência ao caller (é a
+/// base do "confirmado vs. faltante" da comparação antes/depois, ticket 04) quanto
+/// para depurar testes.</summary>
 public sealed record BuyerFilterOutcome(
     BuyerCandidateProduct Product,
     bool Passed,
+    IReadOnlyList<string> ConfirmedRequirements,
     IReadOnlyList<string> UnmetRequirements);
 
 /// <summary>Saída completa da simulação: todos os produtos avaliados (com motivo de

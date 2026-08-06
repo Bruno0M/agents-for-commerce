@@ -211,6 +211,104 @@ public class BuyerAgentDecisionEngineTests
     }
 
     [Fact]
+    public void Simulate_AttributeValueNegatesRequirementInSameClause_IsDiscardedDespiteLiteralSubstringMatch()
+    {
+        // Real bug hit on the demo catalog's own control product (Corvo Sport 2, ticket
+        // 04): the generated description-derived value is "Não possui cancelamento de
+        // ruído ativo" — plain Contains("ativo") would wrongly confirm this.
+        var requirements = new BuyerOrderRequirements(
+            [new BuyerAttributeRequirement("Cancelamento de ruído", "ativo")]);
+
+        var product = Product("1", "Fone sem ANC", attributes: new()
+        {
+            ["Cancelamento de ruído"] = "Não possui cancelamento de ruído ativo",
+        });
+
+        var result = BuyerAgentDecisionEngine.Simulate(requirements, [product]);
+
+        Assert.Empty(result.PassedCandidates);
+        var outcome = Assert.Single(result.FilterOutcomes);
+        Assert.False(outcome.Passed);
+        Assert.Contains(outcome.UnmetRequirements, r => r.Contains("Cancelamento de ruído"));
+    }
+
+    [Fact]
+    public void Simulate_NegationInAnEarlierClauseDoesNotBlockAConfirmationInALaterClause()
+    {
+        var requirements = new BuyerOrderRequirements(
+            [new BuyerAttributeRequirement("Cancelamento de ruído", "ativo")]);
+
+        var product = Product("1", "Fone com ANC e sem resistência à água", attributes: new()
+        {
+            ["Cancelamento de ruído"] = "Sem bateria fraca aqui; cancelamento de ruído ativo com três níveis",
+        });
+
+        var result = BuyerAgentDecisionEngine.Simulate(requirements, [product]);
+
+        Assert.Single(result.PassedCandidates);
+    }
+
+    [Fact]
+    public void Simulate_NumericMinimumBelowThreshold_IsDiscardedWithReasonShowingBothNumbers()
+    {
+        var requirements = new BuyerOrderRequirements(
+            [],
+            NumericMinimumRequirements: [new BuyerNumericMinimumRequirement("Autonomia da bateria", 20m, "h")]);
+
+        var product = Product("1", "Fone 14h", attributes: new()
+        {
+            ["Autonomia da bateria"] = "14 horas",
+        });
+
+        var result = BuyerAgentDecisionEngine.Simulate(requirements, [product]);
+
+        Assert.Empty(result.PassedCandidates);
+        var outcome = Assert.Single(result.FilterOutcomes);
+        Assert.False(outcome.Passed);
+        Assert.Contains(outcome.UnmetRequirements, r => r.Contains("14") && r.Contains("abaixo do mínimo"));
+    }
+
+    [Fact]
+    public void Simulate_NumericMinimumAtOrAboveThreshold_IsConfirmed()
+    {
+        var requirements = new BuyerOrderRequirements(
+            [],
+            NumericMinimumRequirements: [new BuyerNumericMinimumRequirement("Autonomia da bateria", 20m, "h")]);
+
+        var product = Product("1", "Fone 28h", attributes: new()
+        {
+            ["Autonomia da bateria"] = "Até 28 horas com o estojo de recarga",
+        });
+
+        var result = BuyerAgentDecisionEngine.Simulate(requirements, [product]);
+
+        Assert.Single(result.PassedCandidates);
+        var outcome = Assert.Single(result.FilterOutcomes);
+        Assert.Contains(outcome.ConfirmedRequirements, r => r.Contains("28"));
+    }
+
+    [Fact]
+    public void Simulate_RequirementNameDiffersFromAttributeKeyBySynonym_StillMatchesViaSharedSignificantWord()
+    {
+        // Real risk flagged in ticket 03's comments and confirmed live on ticket 04's
+        // pedido A: the order's requirement extraction and generate_optimized_content's
+        // property extraction are independent LLM calls that can name the same concept
+        // differently ("Duração da bateria" vs "Autonomia da bateria").
+        var requirements = new BuyerOrderRequirements(
+            [],
+            NumericMinimumRequirements: [new BuyerNumericMinimumRequirement("Duração da bateria", 20m, "h")]);
+
+        var product = Product("1", "Fone 28h", attributes: new()
+        {
+            ["Autonomia da bateria"] = "28 horas",
+        });
+
+        var result = BuyerAgentDecisionEngine.Simulate(requirements, [product]);
+
+        Assert.Single(result.PassedCandidates);
+    }
+
+    [Fact]
     public void Simulate_GenericEngineWorksForUnrelatedProductDomainsWithoutCategorySpecificCode()
     {
         // Same engine, no code change — proves the mechanic is catalog-agnostic

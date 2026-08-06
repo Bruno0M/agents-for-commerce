@@ -1,0 +1,116 @@
+[0m[31mtoken present: [0m[33mtrue[0m storeName: afc-store-o7xzc4c2[0m
+=== ProductJsonLd raw <script> markup ===
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"Preto","description":"O Aurora NC7 começou com uma pergunta chata: por que cancelamento de ruído ativo precisa custar o preço de um celular? Colocamos captação por microfone duplo no mesmo padrão de modelos três vezes mais caros, e o silêncio aparece no primeiro segundo — no busão, no open space, no voo das seis da manhã. O estojo recarrega o fone quase três vezes, o que na prática dá 28 horas longe da tomada. Esqueceu de carregar? Dez minutos na base devolvem cerca de duas horas de música. O Bluetooth 5.3 mantém dois aparelhos conectados ao mesmo tempo, então a reunião que entra no notebook não briga com o que está tocando no celular. São 4,8 g em cada lado, certificação IPX4 para chuva leve e treino puxado, e três tamanhos de ponteira na caixa até você achar a vedação certa. Transmissão em AAC e SBC.","image":"https://cdn.shopify.com/s/files/1/0847/2136/9300/files/photo-1606220588913-b3aacb4d2f46.jpg?v=1785865576","url":"http://localhost:5173/products/aurora-nc7","sku":"gid://shopify/ProductVariant/48422578651348","productID":"gid://shopify/ProductVariant/48422578651348","brand":{"@type":"Brand","name":"Aurora"},"additionalProperty":[{"@type":"PropertyValue","name":"Cor","value":"Preto"},{"@type":"PropertyValue","name":"descriptionHtml","value":"<p>O Aurora NC7 começou com uma pergunta chata: por que cancelamento de ruído ativo precisa custar o preço de um celular? Colocamos captação por microfone duplo no mesmo padrão de modelos três vezes mais caros, e o silêncio aparece no primeiro segundo — no busão, no open space, no voo das seis da manhã.</p>\n<p>O estojo recarrega o fone quase três vezes, o que na prática dá 28 horas longe da tomada. Esqueceu de carregar? Dez minutos na base devolvem cerca de duas horas de música. O Bluetooth 5.3 mantém dois aparelhos conectados ao mesmo tempo, então a reunião que entra no notebook não briga com o que está tocando no celular.</p>\n<p>São 4,8 g em cada lado, certificação IPX4 para chuva leve e treino puxado, e três tamanhos de ponteira na caixa até você achar a vedação certa. Transmissão em AAC e SBC.</p>"},{"@type":"PropertyValue","name":"productType","value":"Fones de ouvido"}],"isVariantOf":{"@type":"ProductGroup","productGroupID":"gid://shopify/Product/9291231854804","url":"http://localhost:5173/products/aurora-nc7","name":"Aurora NC7","hasVariant":[{"@type":"Product","name":"Preto","sku":"gid://shopify/ProductVariant/48422578651348","productID":"gid://shopify/ProductVariant/48422578651348","url":"http://localhost:5173/products/aurora-nc7-48422578651348","image":"https://cdn.shopify.com/s/files/1/0847/2136/9300/files/photo-1606220588913-b3aacb4d2f46.jpg?v=1785865576","additionalProperty":[{"@type":"PropertyValue","name":"Cor","value":"Preto"},{"@type":"PropertyValue","name":"descriptionHtml","value":"<p>O Aurora NC7 começou com uma pergunta chata: por que cancelamento de ruído ativo precisa custar o preço de um celular? Colocamos captação por microfone duplo no mesmo padrão de modelos três vezes mais caros, e o silêncio aparece no primeiro segundo — no busão, no open space, no voo das seis da manhã.</p>\n<p>O estojo recarrega o fone quase três vezes, o que na prática dá 28 horas longe da tomada. Esqueceu de carregar? Dez minutos na base devolvem cerca de duas horas de música. O Bluetooth 5.3 mantém dois aparelhos conectados ao mesmo tempo, então a reunião que entra no notebook não briga com o que está tocando no celular.</p>\n<p>São 4,8 g em cada lado, certificação IPX4 para chuva leve e treino puxado, e três tamanhos de ponteira na caixa até você achar a vedação certa. Transmissão em AAC e SBC.</p>"},{"@type":"PropertyValue","name":"productType","value":"Fones de ouvido"}],"offers":{"@type":"Offer","price":289,"priceCurrency":"BRL","availability":"https://schema.org/InStock"}},{"@type":"Product","name":"Areia","sku":"gid://shopify/ProductVariant/48422578684116","productID":"gid://shopify/ProductVariant/48422578684116","url":"http://localhost:5173/products/aurora-nc7-48422578684116","image":"https://cdn.shopify.com/s/files/1/0847/2136/9300/files/photo-1606220588913-b3aacb4d2f46.jpg?v=1785865576","additionalProperty":[{"@type":"PropertyValue","name":"Cor","value":"Areia"},{"@type":"PropertyValue","name":"descriptionHtml","value":"<p>O Aurora NC7 começou com uma pergunta chata: por que cancelamento de ruído ativo precisa custar o preço de um celular? Colocamos captação por microfone duplo no mesmo padrão de modelos três vezes mais caros, e o silêncio aparece no primeiro segundo — no busão, no open space, no voo das seis da manhã.</p>\n<p>O estojo recarrega o fone quase três vezes, o que na prática dá 28 horas longe da tomada. Esqueceu de carregar? Dez minutos na base devolvem cerca de duas horas de música. O Bluetooth 5.3 mantém dois aparelhos conectados ao mesmo tempo, então a reunião que entra no notebook não briga com o que está tocando no celular.</p>\n<p>São 4,8 g em cada lado, certificação IPX4 para chuva leve e treino puxado, e três tamanhos de ponteira na caixa até você achar a vedação certa. Transmissão em AAC e SBC.</p>"},{"@type":"PropertyValue","name":"productType","value":"Fones de ouvido"}],"offers":{"@type":"Offer","price":289,"priceCurrency":"BRL","availability":"https://schema.org/InStock"}}]},"offers":{"@type":"Offer","price":289,"priceCurrency":"BRL","availability":"https://schema.org/InStock","url":"http://localhost:5173/products/aurora-nc7"}}</script>
+
+=== FAQPageJsonLd raw <script> markup (expected empty — no FAQ data yet, ticket 08) ===
+""
+
+=== Parsed ProductJsonLd JSON (pretty) ===
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "Preto",
+  "description": "O Aurora NC7 começou com uma pergunta chata: por que cancelamento de ruído ativo precisa custar o preço de um celular? Colocamos captação por microfone duplo no mesmo padrão de modelos três vezes mais caros, e o silêncio aparece no primeiro segundo — no busão, no open space, no voo das seis da manhã. O estojo recarrega o fone quase três vezes, o que na prática dá 28 horas longe da tomada. Esqueceu de carregar? Dez minutos na base devolvem cerca de duas horas de música. O Bluetooth 5.3 mantém dois aparelhos conectados ao mesmo tempo, então a reunião que entra no notebook não briga com o que está tocando no celular. São 4,8 g em cada lado, certificação IPX4 para chuva leve e treino puxado, e três tamanhos de ponteira na caixa até você achar a vedação certa. Transmissão em AAC e SBC.",
+  "image": "https://cdn.shopify.com/s/files/1/0847/2136/9300/files/photo-1606220588913-b3aacb4d2f46.jpg?v=1785865576",
+  "url": "http://localhost:5173/products/aurora-nc7",
+  "sku": "gid://shopify/ProductVariant/48422578651348",
+  "productID": "gid://shopify/ProductVariant/48422578651348",
+  "brand": {
+    "@type": "Brand",
+    "name": "Aurora"
+  },
+  "additionalProperty": [
+    {
+      "@type": "PropertyValue",
+      "name": "Cor",
+      "value": "Preto"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "descriptionHtml",
+      "value": "<p>O Aurora NC7 começou com uma pergunta chata: por que cancelamento de ruído ativo precisa custar o preço de um celular? Colocamos captação por microfone duplo no mesmo padrão de modelos três vezes mais caros, e o silêncio aparece no primeiro segundo — no busão, no open space, no voo das seis da manhã.</p>\n<p>O estojo recarrega o fone quase três vezes, o que na prática dá 28 horas longe da tomada. Esqueceu de carregar? Dez minutos na base devolvem cerca de duas horas de música. O Bluetooth 5.3 mantém dois aparelhos conectados ao mesmo tempo, então a reunião que entra no notebook não briga com o que está tocando no celular.</p>\n<p>São 4,8 g em cada lado, certificação IPX4 para chuva leve e treino puxado, e três tamanhos de ponteira na caixa até você achar a vedação certa. Transmissão em AAC e SBC.</p>"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "productType",
+      "value": "Fones de ouvido"
+    }
+  ],
+  "isVariantOf": {
+    "@type": "ProductGroup",
+    "productGroupID": "gid://shopify/Product/9291231854804",
+    "url": "http://localhost:5173/products/aurora-nc7",
+    "name": "Aurora NC7",
+    "hasVariant": [
+      {
+        "@type": "Product",
+        "name": "Preto",
+        "sku": "gid://shopify/ProductVariant/48422578651348",
+        "productID": "gid://shopify/ProductVariant/48422578651348",
+        "url": "http://localhost:5173/products/aurora-nc7-48422578651348",
+        "image": "https://cdn.shopify.com/s/files/1/0847/2136/9300/files/photo-1606220588913-b3aacb4d2f46.jpg?v=1785865576",
+        "additionalProperty": [
+          {
+            "@type": "PropertyValue",
+            "name": "Cor",
+            "value": "Preto"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "descriptionHtml",
+            "value": "<p>O Aurora NC7 começou com uma pergunta chata: por que cancelamento de ruído ativo precisa custar o preço de um celular? Colocamos captação por microfone duplo no mesmo padrão de modelos três vezes mais caros, e o silêncio aparece no primeiro segundo — no busão, no open space, no voo das seis da manhã.</p>\n<p>O estojo recarrega o fone quase três vezes, o que na prática dá 28 horas longe da tomada. Esqueceu de carregar? Dez minutos na base devolvem cerca de duas horas de música. O Bluetooth 5.3 mantém dois aparelhos conectados ao mesmo tempo, então a reunião que entra no notebook não briga com o que está tocando no celular.</p>\n<p>São 4,8 g em cada lado, certificação IPX4 para chuva leve e treino puxado, e três tamanhos de ponteira na caixa até você achar a vedação certa. Transmissão em AAC e SBC.</p>"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "productType",
+            "value": "Fones de ouvido"
+          }
+        ],
+        "offers": {
+          "@type": "Offer",
+          "price": 289,
+          "priceCurrency": "BRL",
+          "availability": "https://schema.org/InStock"
+        }
+      },
+      {
+        "@type": "Product",
+        "name": "Areia",
+        "sku": "gid://shopify/ProductVariant/48422578684116",
+        "productID": "gid://shopify/ProductVariant/48422578684116",
+        "url": "http://localhost:5173/products/aurora-nc7-48422578684116",
+        "image": "https://cdn.shopify.com/s/files/1/0847/2136/9300/files/photo-1606220588913-b3aacb4d2f46.jpg?v=1785865576",
+        "additionalProperty": [
+          {
+            "@type": "PropertyValue",
+            "name": "Cor",
+            "value": "Areia"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "descriptionHtml",
+            "value": "<p>O Aurora NC7 começou com uma pergunta chata: por que cancelamento de ruído ativo precisa custar o preço de um celular? Colocamos captação por microfone duplo no mesmo padrão de modelos três vezes mais caros, e o silêncio aparece no primeiro segundo — no busão, no open space, no voo das seis da manhã.</p>\n<p>O estojo recarrega o fone quase três vezes, o que na prática dá 28 horas longe da tomada. Esqueceu de carregar? Dez minutos na base devolvem cerca de duas horas de música. O Bluetooth 5.3 mantém dois aparelhos conectados ao mesmo tempo, então a reunião que entra no notebook não briga com o que está tocando no celular.</p>\n<p>São 4,8 g em cada lado, certificação IPX4 para chuva leve e treino puxado, e três tamanhos de ponteira na caixa até você achar a vedação certa. Transmissão em AAC e SBC.</p>"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "productType",
+            "value": "Fones de ouvido"
+          }
+        ],
+        "offers": {
+          "@type": "Offer",
+          "price": 289,
+          "priceCurrency": "BRL",
+          "availability": "https://schema.org/InStock"
+        }
+      }
+    ]
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": 289,
+    "priceCurrency": "BRL",
+    "availability": "https://schema.org/InStock",
+    "url": "http://localhost:5173/products/aurora-nc7"
+  }
+}

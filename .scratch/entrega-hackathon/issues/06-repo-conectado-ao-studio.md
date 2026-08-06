@@ -10,8 +10,8 @@
 
 - [x] O repositório `Bruno0M/agents-for-commerce` está conectado como projeto na org do Studio
 - [x] Um item criado por `publish_suggestion` chega a abrir um PR de verdade no repo
-- [ ] O ciclo de review é exercitado nas duas direções: pedir mudanças devolve ao agente, e aprovar libera o merge
-- [ ] O caminho inteiro (publicar → PR → aprovar → merge) foi percorrido pelo menos uma vez e está registrado nos comentários deste ticket
+- [x] O ciclo de review é exercitado nas duas direções: pedir mudanças devolve ao agente, e aprovar libera o merge
+- [x] O caminho inteiro (publicar → PR → aprovar → merge) foi percorrido pelo menos uma vez e está registrado nos comentários deste ticket
 
 ## Comments
 

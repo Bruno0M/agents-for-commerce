@@ -29,13 +29,21 @@ public class BuyerAgentSimulatorTools(AiGatewayClient aiGatewayClient, AiGateway
             throw new McpException("O catálogo informado está vazio — nada para simular.");
         }
 
-        var requirements = await ExtractRequirementsAsync(naturalLanguageOrder, cancellationToken);
+        var requirements = await ExtractRequirementsAsync(aiGatewayClient, aiGatewayOptions, naturalLanguageOrder, cancellationToken);
         var candidates = catalog.Select(ToCandidateProduct).ToList();
 
         return BuyerAgentDecisionEngine.Simulate(requirements, candidates);
     }
 
-    private async Task<BuyerOrderRequirements> ExtractRequirementsAsync(
+    // Static (not an instance method on this class) so BeforeAfterComparisonTools
+    // (ticket 04) can extract requirements once from an AiGatewayClient/AiGatewayOptions
+    // it injects itself, and reuse the same BuyerOrderRequirements for both the
+    // "antes" and "depois" rounds — two independent extractions (one per round) would
+    // let AI Gateway non-determinism change *what's being asked* between rounds, not
+    // just what the catalog can confirm, defeating the point of an antes/depois delta.
+    internal static async Task<BuyerOrderRequirements> ExtractRequirementsAsync(
+        AiGatewayClient aiGatewayClient,
+        AiGatewayOptions aiGatewayOptions,
         string naturalLanguageOrder,
         CancellationToken cancellationToken)
     {
@@ -84,7 +92,11 @@ public class BuyerAgentSimulatorTools(AiGatewayClient aiGatewayClient, AiGateway
             .Select(a => new BuyerAttributeRequirement(a.Name, a.ExpectedValue))
             .ToList();
 
-        return new BuyerOrderRequirements(attributeRequirements, extracted.MaxPrice);
+        var numericMinimumRequirements = (extracted.MinNumericRequirements ?? [])
+            .Select(n => new BuyerNumericMinimumRequirement(n.Name, n.MinValue, n.Unit))
+            .ToList();
+
+        return new BuyerOrderRequirements(attributeRequirements, extracted.MaxPrice, numericMinimumRequirements);
     }
 
     // The extraction prompt asks for raw JSON, but models sometimes wrap it in a
@@ -208,18 +220,39 @@ public class BuyerAgentSimulatorTools(AiGatewayClient aiGatewayClient, AiGateway
 
         A partir do pedido em linguagem natural do usuário, extraia os requisitos obrigatórios
         que um produto precisa confirmar via dado estruturado para ser considerado candidato:
-        tipo de produto, características obrigatórias, e uma eventual restrição de preço máximo.
+        tipo de produto, características obrigatórias, mínimos numéricos e uma eventual
+        restrição de preço máximo.
 
         Responda apenas com um objeto JSON neste formato:
         {
           "attributeRequirements": [{"name": "...", "expectedValue": "..."}],
+          "minNumericRequirements": [{"name": "...", "minValue": 20.0, "unit": "h"}],
           "maxPrice": 300.0
         }
 
         Regras:
         - Sempre inclua um requisito para o tipo de produto quando o pedido mencionar um
-          (name: "Tipo de produto", expectedValue: o tipo pedido, ex: "fone bluetooth").
+          (name: "Tipo de produto", expectedValue: só a categoria do produto, no singular e
+          sem tecnologia/conectividade/característica — ex: "fone", não "fone bluetooth";
+          "tênis", não "tênis para corrida"). Tecnologia/conectividade citada só como parte
+          de descrever a categoria (ex: "bluetooth" em "fone bluetooth") NÃO vira um
+          requisito à parte — é contexto, não uma exigência a confirmar. Só crie um
+          requisito separado para ela se o pedido claramente exigir uma versão/capacidade
+          específica dela (ex: "com Bluetooth 5.0 ou superior", "que aceite dois aparelhos
+          ao mesmo tempo").
         - Um requisito por característica obrigatória distinta mencionada no pedido.
+        - A confirmação casa "expectedValue" contra o texto do dado estruturado do produto
+          por substring — nunca use "sim"/"não" como expectedValue para uma característica
+          ligar/desligar (ex: cancelamento de ruído, resistência à água), porque uma
+          especificação real de produto não escreve "sim", escreve a condição em si (ex:
+          "ativo", "presente", "IPX7"). Use o adjetivo/particípio que descreveria a
+          característica numa ficha técnica, não uma resposta de sim/não.
+        - Quando o pedido exigir um mínimo numérico para uma característica ("pelo menos X
+          horas", "no mínimo Y", "acima de Z"), NÃO coloque em "attributeRequirements" — o
+          dado estruturado do produto é prosa (ex: "Até 28 horas com o estojo"), então
+          confirmar por substring nunca funciona para uma comparação "≥". Coloque em
+          "minNumericRequirements": {"name": o nome da característica, "minValue": o número
+          mínimo, "unit": a unidade abreviada se houver (ex: "h", "km"), ou null.
         - "maxPrice": o valor numérico do limite de preço, se houver, sem símbolo de moeda.
           Sem restrição de preço no pedido, retorne null.
         - Nunca invente um requisito que não esteja implícito ou explícito no pedido.
@@ -228,6 +261,9 @@ public class BuyerAgentSimulatorTools(AiGatewayClient aiGatewayClient, AiGateway
 
 internal sealed record ExtractedRequirements(
     IReadOnlyList<ExtractedAttributeRequirement>? AttributeRequirements,
+    IReadOnlyList<ExtractedNumericMinimumRequirement>? MinNumericRequirements,
     decimal? MaxPrice);
+
+internal sealed record ExtractedNumericMinimumRequirement(string Name, decimal MinValue, string? Unit);
 
 internal sealed record ExtractedAttributeRequirement(string Name, string ExpectedValue);

@@ -1,5 +1,5 @@
 import type { ProductDetailsPage } from "@decocms/apps-commerce/types";
-import { BreadcrumbJsonLd, ProductJsonLd } from "@decocms/blocks/hooks";
+import { BreadcrumbJsonLd, FAQPageJsonLd, ProductJsonLd } from "@decocms/blocks/hooks";
 import ProductHero, { type HeroCopyConfig } from "../../components/product/pdp/ProductHero";
 import type { GalleryConfig } from "../../components/product/pdp/ProductGallery";
 import type { VariantSelectorConfig } from "../../components/product/pdp/ProductVariantSelector";
@@ -74,6 +74,7 @@ export default function ProductDetails({
     <div className="container flex w-full flex-col gap-3 px-3 pt-15 pb-4 sm:gap-4 sm:pb-6">
       {/* SEO: schema.org JSON-LD, server-rendered inline (crawlers read it anywhere in the document) */}
       <ProductJsonLd product={page.product} />
+      <FAQPageJsonLd questions={page.product.questions} />
       <BreadcrumbJsonLd breadcrumb={page.breadcrumbList} />
       <ProductHero
         page={page}

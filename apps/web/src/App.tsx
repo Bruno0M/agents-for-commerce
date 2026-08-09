@@ -8,15 +8,13 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
-import { ExamWizard } from "@/wizard/ExamWizard"
 
 const DESTINATION_TITLE: Record<Destination, string> = {
-  wizard: "Exame guiado",
   catalog: "Catálogo",
 }
 
 export function App() {
-  const [destination, setDestination] = useState<Destination>("wizard")
+  const [destination, setDestination] = useState<Destination>("catalog")
 
   return (
     <SidebarProvider>
@@ -32,7 +30,7 @@ export function App() {
             {DESTINATION_TITLE[destination]}
           </span>
         </header>
-        {destination === "wizard" ? <ExamWizard /> : <CatalogPage />}
+        <CatalogPage />
       </SidebarInset>
     </SidebarProvider>
   )

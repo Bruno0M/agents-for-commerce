@@ -1,4 +1,4 @@
-import { ClipboardCheckIcon, PackageIcon } from "lucide-react"
+import { PackageIcon } from "lucide-react"
 
 import {
   Sidebar,
@@ -12,16 +12,13 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-export type Destination = "wizard" | "catalog"
+export type Destination = "catalog"
 
 const navItems: {
   title: string
   icon: typeof PackageIcon
   destination: Destination
-}[] = [
-  { title: "Exame guiado", icon: ClipboardCheckIcon, destination: "wizard" },
-  { title: "Catálogo", icon: PackageIcon, destination: "catalog" },
-]
+}[] = [{ title: "Catálogo", icon: PackageIcon, destination: "catalog" }]
 
 type AppSidebarProps = {
   destination: Destination

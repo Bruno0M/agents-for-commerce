@@ -17,8 +17,14 @@ Critério de corte para qualquer ideia nova: *isso fortalece a **medição** ou 
 
 ### Issue tracker
 
-Issues and specs live as markdown files under `.scratch/<feature-slug>/`. See `docs/agents/issue-tracker.md`.
+Issues and specs live as GitHub issues on `Bruno0M/agents-for-commerce`, managed with the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+As specs antigas em `.scratch/<feature-slug>/` ficam de pé como histórico; trabalho novo entra no GitHub.
+
+### Triage labels
+
+The five canonical triage roles, each label string equal to its name. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 
-Multi-context layout — a root `CONTEXT-MAP.md` points to per-app `CONTEXT.md` files under `apps/mcp-server/` and `apps/storefront/`. See `docs/agents/domain.md`.
+Multi-context layout — a root `CONTEXT-MAP.md` points to per-app `CONTEXT.md` files under `apps/`. See `docs/agents/domain.md`.

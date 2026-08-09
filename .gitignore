@@ -1,5 +1,10 @@
-# Internal planning docs (private for now)
-/docs
+# Internal planning docs (private for now) — exceto a config dos agent skills,
+# que o CLAUDE.md versionado referencia e portanto precisa viajar com o repo.
+/docs/*
+!/docs/agents/
+
+# Clone local do deco Studio, mantido só para consulta (repo git próprio)
+apps/studio/
 
 # Dependencies
 node_modules/

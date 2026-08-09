@@ -28,3 +28,19 @@ mudança de motivo entre as rodadas ("sem dado estruturado para confirmar X" →
 - [ ] O catálogo "depois" está congelado em arquivo versionado, e a rodada replica sem gastar crédito e sem depender da loja no ar
 - [ ] Modelo, temperature e data de cada rodada estão registrados junto do resultado
 - [ ] A metodologia (mesmo catálogo, mesmos pedidos, determinismo, definição de sucesso e denominador) está publicada no README
+
+## Comments
+
+**Congelar o texto do pedido não é suficiente, e este ticket já tem meio caminho do argumento.**
+Ele registra que a extração de requisitos (`BuyerAgentSimulatorTools.cs:45`) é não-determinística
+e que não há seed no AI Gateway. A conclusão que falta: "mesmos pedidos" tem que significar
+**mesmos requisitos extraídos**, não mesmo texto — reextrair do mesmo texto devolve requisitos
+ligeiramente diferentes, e a divergência aparece como mudança de resultado sem ninguém conseguir
+apontar onde.
+
+O `BuyerOrderRequirements` congelado ao lado do catálogo resolve os dois problemas de uma vez:
+a reprodutibilidade que este ticket quer, e a comparabilidade entre passadas ao longo do tempo
+que o ticket 11 da `exame-guiado` pede. Bônus: com os requisitos congelados a réplica não gasta
+crédito nenhum — `BuildComparison` e `BuyerAgentDecisionEngine.Simulate` são lógica pura, sem
+rede (`BeforeAfterComparisonTools.cs:54`), e a única chamada de LLM do caminho é justamente a
+extração.

@@ -56,3 +56,36 @@ publicar.
 Este ticket também **perdeu a regra de corte** que tinha ("cortar sem hesitar se o P0
 escorregar"): a UI foi promovida a prioridade explícita. O que a substitui é a ordem — ela
 vem depois de o loop estar fechado (fases 1 e 2 do README), não antes.
+
+**07/08/2026 — a tela saiu deste ticket.** O desenho da tela virou spec própria em
+`.scratch/view-antes-depois/spec.md`: app React/TS/Vite em `apps/comparison-view/` com dados
+mockados, sem rede e sem MCP no circuito. A 14 fica com o que sempre foi o risco de verdade —
+resource, `_meta.ui.resourceUri` e handshake — e passa a renderizar o componente que a outra
+spec produz.
+
+Motivo da separação: as duas incertezas (o handshake sobe? a tela comunica?) falham por
+motivos diferentes e não deviam falhar no mesmo passo. Separadas, uma tela pronta sem
+handshake ainda é apresentável num front próprio; um handshake provado sem tela é trabalho que
+não se perde.
+
+Decidido junto: a tela é escrita **uma vez** e serve aos dois consumidores — a view dentro do
+Studio e um front próprio servido à parte. A única diferença entre eles é de onde vem o
+`BeforeAfterComparisonResult` (handshake vs. HTTP); o componente de topo é o mesmo.
+
+A spec registra um achado que volta para cá e para a 04: a tela precisa de dois campos que o
+servidor **não produz hoje** — a origem de cada dado confirmado e o trecho da descrição onde a
+informação já estava. Sem eles não existe o drill-down de evidência.
+
+**08/08/2026 — a tela mudou de endereço, não de natureza.** O desenvolvimento passou a seguir só
+no `apps/web/` e o `apps/comparison-view/` foi aposentado como app; componentes, fixtures e
+testes migram para lá (ticket 04 da `exame-guiado`, e emenda ao D7 no fim daquela spec).
+
+**Nada disso bloqueia este ticket**, porque ele nunca dependeu de o `comparison-view` existir
+como app — dependia de o `ComparisonView` ser função pura do `BeforeAfterComparisonResult`, e
+essa propriedade virou critério explícito no 11 justamente para não se perder na migração.
+
+Duas coisas para conferir na hora de montar o bundle, que antes o isolamento do app dava de
+graça: o `apps/web` traz shadcn, Tailwind v4 e `@fontsource-variable/geist` no entorno, e sob
+`default-src 'none'` **a fonte precisa virar data URI ou sair**. Ícones do `lucide-react` são
+SVG inline e não são problema; Tailwind compila para CSS e também não. O que não pode entrar no
+componente é qualquer coisa que exija requisição em runtime.

@@ -440,9 +440,19 @@ function CatalogExam({ catalog }: { catalog: ProductCatalogReadResult }) {
                     >
                       <TableCell className="font-medium">
                         {examRow ? (
-                          <span className="hover:underline">
+                          // O `onClick` da `<tr>` acima é só atalho de mouse:
+                          // `<tr>` não é focável nem ativável por teclado, e
+                          // sem este botão o drill-down fica inalcançável para
+                          // quem navega por Tab. Clicar no título borbulha
+                          // para a linha e cai no mesmo `setSelectedProductId`
+                          // — idempotente, abre o mesmo produto.
+                          <button
+                            type="button"
+                            className="cursor-pointer text-left hover:underline"
+                            onClick={() => setSelectedProductId(product.id)}
+                          >
                             {product.title}
-                          </span>
+                          </button>
                         ) : (
                           product.title
                         )}

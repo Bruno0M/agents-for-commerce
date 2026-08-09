@@ -11,8 +11,10 @@ import * as runSimulationAgentLib from "@/diagnosis/lib/runSimulationAgent"
 import { simulationAgentNormalScenario } from "@/diagnosis/fixtures/simulationAgentPayloads"
 import type {
   BuyerAgentSimulationBatchResult,
+  ProductExamState,
   TestOrderGenerationResult,
 } from "@/diagnosis/types"
+import { EXAM_STATE_LABELS } from "@/diagnosis/lib/examStateLabels"
 import { lojaRealSemGabaritoCatalog } from "@/diagnosis/fixtures/loja-real-sem-gabarito"
 import { TransportProvider } from "@/transport/context"
 import { createFixtureTransport } from "@/transport/fixtureTransport"
@@ -76,12 +78,43 @@ async function runSimulationAndWait() {
   )
 }
 
-function setStateFilter(state: string) {
-  fireEvent.change(screen.getByLabelText("Estado"), { target: { value: state } })
+/**
+ * Os dois filtros de dropdown são `Select` do Base UI: um
+ * `<button role="combobox">` que abre um popup com `role="option"` — não um
+ * `<select>` nativo, então `fireEvent.change` não os move. Escolher é o que o
+ * usuário faz: abre e clica na opção pelo rótulo visível.
+ */
+async function chooseOption(comboboxLabel: string, optionLabel: string) {
+  const combobox = screen.getByLabelText(comboboxLabel)
+  fireEvent.click(combobox)
+  const option = await screen.findByRole("option", { name: optionLabel })
+  // O item do Base UI commita no ciclo de ponteiro, não no `click` sozinho —
+  // um `fireEvent.click` puro abre e fecha o popup sem trocar o valor.
+  fireEvent.pointerDown(option, { button: 0 })
+  fireEvent.pointerUp(option, { button: 0 })
+  fireEvent.click(option)
+  // O gatilho exibindo o rótulo escolhido é o sinal de que a escolha chegou
+  // ao estado — esperar o popup sumir não serve, porque no jsdom ele fica
+  // montado esperando uma transição de fechamento que nunca roda.
+  await waitFor(() => expect(combobox).toHaveTextContent(optionLabel))
 }
 
-function setOrderFilter(orderId: string) {
-  fireEvent.change(screen.getByLabelText("Pedido"), { target: { value: orderId } })
+/** Recebe o estado (o valor), não o rótulo — a tela mostra o rótulo. */
+async function setStateFilter(state: ProductExamState) {
+  await chooseOption("Estado", EXAM_STATE_LABELS[state])
+}
+
+/**
+ * Recebe o id do pedido; o rótulo da opção é o texto do próprio pedido, o
+ * mesmo que a tela usa (`orderSummaries` mapeia `order.text` para `label`).
+ */
+async function setOrderFilter(orderId: string) {
+  const order =
+    simulationAgentNormalScenario.testOrderGeneration.orders.find(
+      (candidate) => candidate.id === orderId
+    )
+  if (!order) throw new Error(`Pedido ${orderId} não existe no cenário fixo`)
+  await chooseOption("Pedido", order.text)
 }
 
 function setSearch(term: string) {
@@ -225,7 +258,7 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
     expect(scoreboardNumber()).toBe(before)
 
     setSearch("")
-    setStateFilter("passed")
+    await setStateFilter("passed")
     expect(scoreboardNumber()).toBe(before)
   })
 
@@ -233,21 +266,21 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
     await renderCatalogPage()
     await runSimulationAndWait()
 
-    setStateFilter("passed")
+    await setStateFilter("passed")
     expect(screen.getByRole("row", { name: /Fone Zenith Air/ })).toBeInTheDocument()
     expect(screen.queryByRole("row", { name: /Aurora NC7/ })).not.toBeInTheDocument()
 
-    setStateFilter("illegible")
+    await setStateFilter("illegible")
     expect(screen.getByRole("row", { name: /Aurora NC7/ })).toBeInTheDocument()
     expect(
       screen.queryByRole("row", { name: /Fone Zenith Air/ })
     ).not.toBeInTheDocument()
 
-    setStateFilter("mixed")
+    await setStateFilter("mixed")
     expect(screen.getByRole("row", { name: /Corvo Sport 2/ })).toBeInTheDocument()
     expect(screen.queryByRole("row", { name: /Aurora NC7/ })).not.toBeInTheDocument()
 
-    setStateFilter("legitimatelyRejected")
+    await setStateFilter("legitimatelyRejected")
     expect(
       screen.getByRole("row", { name: /Fone Nebula Pro/ })
     ).toBeInTheDocument()
@@ -284,12 +317,12 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
     await renderCatalogPage()
     await runSimulationAndWait()
 
-    setOrderFilter("pedido-fone-completo")
+    await setOrderFilter("pedido-fone-completo")
     expect(
       screen.queryByRole("row", { name: /Fone Nebula Pro/ })
     ).not.toBeInTheDocument()
 
-    setOrderFilter("pedido-fone-viagem")
+    await setOrderFilter("pedido-fone-viagem")
     const row = screen.getByRole("row", { name: /Fone Nebula Pro/ })
     expect(within(row).getByText("Não atende")).toBeInTheDocument()
   })

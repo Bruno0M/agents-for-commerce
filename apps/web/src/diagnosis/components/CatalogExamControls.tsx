@@ -1,3 +1,4 @@
+import { useId } from "react"
 import type * as React from "react"
 import { Input } from "@/components/ui/input"
 import {
@@ -61,6 +62,13 @@ export function CatalogExamControls({
   visibleRowCount,
   totalRowCount,
 }: CatalogExamControlsProps) {
+  // O gatilho do `Select` é um `<button role="combobox">`, e `<label for>` não
+  // associa rótulo a botão — sem isto o "Estado" ao lado é texto solto, e o
+  // controle chega ao leitor de tela sem nome nenhum. `aria-labelledby` reusa
+  // o texto que já está visível em vez de duplicá-lo num `aria-label`.
+  const stateLabelId = useId()
+  const orderLabelId = useId()
+
   const stateItems: Record<string, React.ReactNode> = {
     all: "Todos os estados",
     ...Object.fromEntries(
@@ -77,7 +85,7 @@ export function CatalogExamControls({
     <div className="flex flex-col gap-3 rounded-md border px-4 py-3">
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
-          Estado
+          <span id={stateLabelId}>Estado</span>
           <Select
             items={stateItems}
             value={filters.state}
@@ -88,7 +96,7 @@ export function CatalogExamControls({
               })
             }
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px]" aria-labelledby={stateLabelId}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -103,7 +111,7 @@ export function CatalogExamControls({
         </div>
 
         <div className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
-          Pedido
+          <span id={orderLabelId}>Pedido</span>
           <Select
             items={orderItems}
             value={filters.orderId}
@@ -111,7 +119,7 @@ export function CatalogExamControls({
               onFiltersChange({ ...filters, orderId: value ?? "all" })
             }
           >
-            <SelectTrigger className="w-[280px]">
+            <SelectTrigger className="w-[280px]" aria-labelledby={orderLabelId}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="w-[420px]">

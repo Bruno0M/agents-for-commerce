@@ -90,9 +90,9 @@ builder.Services
         options.Stateless = true;
     })
     .WithToolsFromAssembly()
-    // Ticket 01: registers HelloHandshakeResource's ui:// resource so resources/list and
-    // resources/read work — without this, HelloHandshakeTools' _meta.ui.resourceUri points
-    // at a resource the server never serves, and the Studio iframe gets nothing back.
+    // Registers WebAppResource's ui:// resource (ticket 04) so resources/list and
+    // resources/read work — without this, WebAppTools' _meta.ui.resourceUri points at
+    // a resource the server never serves, and the Studio iframe gets nothing back.
     .WithResourcesFromAssembly();
 
 var app = builder.Build();

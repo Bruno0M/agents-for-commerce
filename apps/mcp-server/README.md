@@ -32,6 +32,26 @@ Refer to the VS Code or Visual Studio documentation for more information on conf
 
 Once configured, ask the client to list the available tools, or use `McpServer.http` to send a `tools/list` request directly.
 
+## Building the `/web` view bundle
+
+The Deco Studio view (`apps/web/`) is not read from disk at request time — it's compiled to a
+single HTML file and embedded into this assembly (`Resources/web-app.html`, wired in
+`McpServer.csproj`, served by `Tools/WebAppResource.cs`). That file is checked into the repo
+so `dotnet build`/`dotnet run`/`docker build` all work without needing `apps/web`'s toolchain
+(the `Dockerfile`'s build context is this directory alone — it can't see `apps/web`).
+
+To regenerate it after changing `apps/web`:
+
+```bash
+apps/mcp-server/scripts/build-web-bundle.sh
+```
+
+This runs `apps/web`'s `bun run build:single` and copies the resulting
+`dist-single/index.html` into `Resources/web-app.html`. Rebuild the server afterwards for the
+new bundle to take effect — there's no hot reload for the Studio view. Day-to-day screen
+development still happens with `bun dev` in `apps/web`; the bundle only needs regenerating
+when you want to see a change inside the Studio iframe.
+
 ## Known issues
 
 1. When using VS Code, connecting to `https://localhost:5250` fails.

@@ -13,8 +13,39 @@ import type {
   BuyerAgentSimulationBatchResult,
   TestOrderGenerationResult,
 } from "@/diagnosis/types"
+import { lojaRealSemGabaritoCatalog } from "@/diagnosis/fixtures/loja-real-sem-gabarito"
+import { TransportProvider } from "@/transport/context"
+import { createFixtureTransport } from "@/transport/fixtureTransport"
+import {
+  EXAM_TRANSPORT_DESCRIPTIONS,
+  TransportUnavailableError,
+  type ExamTransport,
+} from "@/transport/types"
 
 const RUN_BUTTON_NAME = "Rodar Agente de Simulação"
+
+/**
+ * A tela sempre roda sob um transporte — desde a issue #6 até o catálogo
+ * chega por ele (`readCatalog`), e não mais de uma constante de módulo. O
+ * default aqui é o de fixture, que é o mesmo que o `bun dev` usa; os testes
+ * que precisam de outro comportamento passam o seu.
+ *
+ * O `await` do fim não é cerimônia: `readCatalog` é assíncrono nos três
+ * transportes, então há um render de "lendo o catálogo" antes da tabela em
+ * qualquer um deles.
+ */
+async function renderCatalogPage(
+  transport: ExamTransport = createFixtureTransport()
+) {
+  const utils = render(
+    <TransportProvider transport={transport}>
+      <CatalogPage />
+    </TransportProvider>
+  )
+
+  await screen.findByRole("row", { name: /Aurora NC7/ })
+  return utils
+}
 
 /**
  * Mocka as duas etapas com o mesmo cenário congelado que o agente A já
@@ -64,15 +95,15 @@ afterEach(() => {
 })
 
 describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
-  it("shows 'not examined' explicitly in the strip before running", () => {
-    render(<CatalogPage />)
+  it("shows 'not examined' explicitly in the strip before running", async () => {
+    await renderCatalogPage()
 
     expect(screen.getByText("Não examinado")).toBeInTheDocument()
     expect(screen.getByText(/Escopo pronto: 7 produtos/)).toBeInTheDocument()
   })
 
   it("shows the declared-scope metric in the strip after the simulation runs", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
 
     await runSimulationAndWait()
 
@@ -83,7 +114,7 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
   })
 
   it("shows a passed product as a row with the confirmed verdict, not an absence", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
     await runSimulationAndWait()
 
     const passedRow = screen.getByRole("row", { name: /Fone Zenith Air/ })
@@ -91,7 +122,7 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
   })
 
   it("distinguishes all four verdict states by accessible text", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
     await runSimulationAndWait()
 
     // ilegibilidade pura
@@ -124,7 +155,7 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
   })
 
   it("shows the reason with the engine's exact phrase, unchanged", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
     await runSimulationAndWait()
 
     const rejectedRow = screen.getByRole("row", { name: /Fone Nebula Pro/ })
@@ -136,7 +167,7 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
   })
 
   it("does not show 'score' anywhere on the screen, before or after the simulation", async () => {
-    const { container } = render(<CatalogPage />)
+    const { container } = await renderCatalogPage()
     expect(container.textContent?.toLowerCase()).not.toContain("score")
 
     await runSimulationAndWait()
@@ -144,7 +175,7 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
   })
 
   it("renders rows in the declared default order: silent loss desc, then fewer distinct illegibility reasons, then title", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
     await runSimulationAndWait()
 
     const titles = screen
@@ -164,7 +195,7 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
   })
 
   it("shows the default sort criterion on screen, not only in the code", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
     await runSimulationAndWait()
 
     expect(
@@ -173,7 +204,7 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
   })
 
   it("shows the silent-loss count on the row itself, next to the product", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
     await runSimulationAndWait()
 
     const auroraRow = screen.getByRole("row", { name: /Aurora NC7/ })
@@ -181,7 +212,7 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
   })
 
   it("[invariante do ticket 03] filtrar não muda o número da faixa de placar — só a loja inteira aparece ali", async () => {
-    const { container } = render(<CatalogPage />)
+    const { container } = await renderCatalogPage()
     await runSimulationAndWait()
 
     const scoreboardNumber = () =>
@@ -199,7 +230,7 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
   })
 
   it("filtra por cada um dos quatro estados", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
     await runSimulationAndWait()
 
     setStateFilter("passed")
@@ -226,7 +257,7 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
   })
 
   it("busca por título", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
     await runSimulationAndWait()
 
     setSearch("Aurora")
@@ -238,7 +269,7 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
   })
 
   it("busca por handle", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
     await runSimulationAndWait()
 
     setSearch("fone-nebula-pro")
@@ -250,7 +281,7 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
   })
 
   it("filtro por pedido torna o par A/B demonstrável: mesmo produto ✅ num pedido e ⭕ noutro", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
     await runSimulationAndWait()
 
     setOrderFilter("pedido-fone-completo")
@@ -264,7 +295,7 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
   })
 
   it("o estado vazio de um filtro diz o que foi filtrado — não é a mesma tela do catálogo vazio", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
     await runSimulationAndWait()
 
     setSearch("produto que não existe em lugar nenhum")
@@ -279,7 +310,7 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
   })
 
   it("limpa os filtros pelo botão da tela vazia de filtro", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
     await runSimulationAndWait()
 
     setSearch("produto que não existe em lugar nenhum")
@@ -296,7 +327,7 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
   })
 
   it("não abre nenhum dialog só de rodar a simulação, sem clicar em linha nenhuma", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
     await runSimulationAndWait()
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
@@ -305,7 +336,7 @@ describe("CatalogPage — resultado do exame (botão único já rodou)", () => {
 
 describe("CatalogPage — drill-down de produto (ticket 05, catalogo-como-exame)", () => {
   it("clicar num produto ilegível abre o dialog com o breakdown por pedido e a ausência explícita de 'depois'", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
     await runSimulationAndWait()
 
     fireEvent.click(screen.getByRole("button", { name: "Aurora NC7" }))
@@ -319,7 +350,7 @@ describe("CatalogPage — drill-down de produto (ticket 05, catalogo-como-exame)
   })
 
   it("clicar num produto que passou em todos os pedidos mostra os requisitos confirmados, sem coluna 'depois'", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
     await runSimulationAndWait()
 
     fireEvent.click(screen.getByRole("button", { name: "Fone Zenith Air" }))
@@ -333,7 +364,7 @@ describe("CatalogPage — drill-down de produto (ticket 05, catalogo-como-exame)
   })
 
   it("clicar num produto rejeitado legitimamente mostra a nota de que nenhuma ação de conserto se aplica", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
     await runSimulationAndWait()
 
     fireEvent.click(screen.getByRole("button", { name: "Fone Nebula Pro" }))
@@ -346,7 +377,7 @@ describe("CatalogPage — drill-down de produto (ticket 05, catalogo-como-exame)
   })
 
   it("fechar o dialog remove ele do documento", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
     await runSimulationAndWait()
 
     fireEvent.click(screen.getByRole("button", { name: "Aurora NC7" }))
@@ -359,8 +390,8 @@ describe("CatalogPage — drill-down de produto (ticket 05, catalogo-como-exame)
     )
   })
 
-  it("produto ainda não examinado não vira botão — não há nada pra abrir antes do exame rodar", () => {
-    render(<CatalogPage />)
+  it("produto ainda não examinado não vira botão — não há nada pra abrir antes do exame rodar", async () => {
+    await renderCatalogPage()
 
     expect(
       screen.queryByRole("button", { name: "Aurora NC7" })
@@ -371,7 +402,7 @@ describe("CatalogPage — drill-down de produto (ticket 05, catalogo-como-exame)
 
 describe("CatalogPage — botão único 'Rodar Agente de Simulação'", () => {
   it("um único clique preenche a tela ponta a ponta, sem aprovar nem editar nada", async () => {
-    render(<CatalogPage />)
+    await renderCatalogPage()
 
     expect(
       screen.getByRole("button", { name: RUN_BUTTON_NAME })
@@ -391,8 +422,8 @@ describe("CatalogPage — botão único 'Rodar Agente de Simulação'", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("antes de rodar, a faixa de pedidos diz que ainda não há pedidos", () => {
-    render(<CatalogPage />)
+  it("antes de rodar, a faixa de pedidos diz que ainda não há pedidos", async () => {
+    await renderCatalogPage()
 
     expect(screen.getByText(/Ainda não há pedidos/)).toBeInTheDocument()
   })
@@ -410,7 +441,7 @@ describe("CatalogPage — botão único 'Rodar Agente de Simulação'", () => {
       "runBuyerAgent"
     ).mockResolvedValue(simulationAgentNormalScenario.simulationBatch)
 
-    render(<CatalogPage />)
+    await renderCatalogPage()
     fireEvent.click(screen.getByRole("button", { name: RUN_BUTTON_NAME }))
 
     const progress = await screen.findByRole("status")
@@ -440,7 +471,7 @@ describe("CatalogPage — botão único 'Rodar Agente de Simulação'", () => {
       () => new Promise((resolve) => (resolveRun = resolve))
     )
 
-    render(<CatalogPage />)
+    await renderCatalogPage()
     fireEvent.click(screen.getByRole("button", { name: RUN_BUTTON_NAME }))
 
     await waitFor(() =>
@@ -480,7 +511,7 @@ describe("CatalogPage — botão único 'Rodar Agente de Simulação'", () => {
       "runBuyerAgent"
     ).mockResolvedValue(simulationAgentNormalScenario.simulationBatch)
 
-    render(<CatalogPage />)
+    await renderCatalogPage()
     fireEvent.click(screen.getByRole("button", { name: RUN_BUTTON_NAME }))
 
     expect(
@@ -513,7 +544,7 @@ describe("CatalogPage — botão único 'Rodar Agente de Simulação'", () => {
       .mockRejectedValueOnce(new Error("Falha simulada ao rodar o agente"))
       .mockResolvedValueOnce(simulationAgentNormalScenario.simulationBatch)
 
-    render(<CatalogPage />)
+    await renderCatalogPage()
     fireEvent.click(screen.getByRole("button", { name: RUN_BUTTON_NAME }))
 
     expect(
@@ -540,19 +571,166 @@ describe("CatalogPage — botão único 'Rodar Agente de Simulação'", () => {
     expect(screen.queryByText("Não examinado")).not.toBeInTheDocument()
   })
 
-  it("a tela declara que o exame não gera conteúdo nenhum", () => {
-    render(<CatalogPage />)
+  it("a tela declara que o exame não gera conteúdo nenhum", async () => {
+    await renderCatalogPage()
 
     expect(
       screen.getByText(/Rodar o exame não gera conteúdo nenhum/)
     ).toBeInTheDocument()
   })
 
-  it("não existe mais o toggle de modo fixture — o catálogo é sempre a fixture", () => {
-    render(<CatalogPage />)
+  it("não existe mais o toggle de modo fixture — o catálogo é sempre a fixture", async () => {
+    await renderCatalogPage()
 
     expect(
       screen.queryByRole("button", { name: /Modo fixture/ })
     ).not.toBeInTheDocument()
+  })
+})
+
+/**
+ * O que a issue #6 acrescentou à tela: ela deixou de ter o catálogo como
+ * constante de módulo e passou a pedi-lo ao transporte. Os testes abaixo
+ * cobrem os estados que essa mudança criou — e o limite de custo, que é
+ * critério de aceite e não dá para verificar por inspeção.
+ */
+describe("CatalogPage — a tela sob o transporte (issue #6)", () => {
+  /** Um transporte de espionagem: conta chamada por chamada. */
+  function createSpyTransport(overrides: Partial<ExamTransport> = {}) {
+    const fixture = createFixtureTransport()
+    return {
+      kind: "fixture" as const,
+      readCatalog: vi.fn(fixture.readCatalog),
+      writeTestOrders: vi.fn(fixture.writeTestOrders),
+      runBuyerAgent: vi.fn(fixture.runBuyerAgent),
+      ...overrides,
+    }
+  }
+
+  it("[custo] montar a tela lê o catálogo e NÃO dispara nenhuma tool de LLM", async () => {
+    const transport = createSpyTransport()
+
+    await renderCatalogPage(transport)
+
+    // `get_product_catalog` custa zero — pode sair de um efeito.
+    expect(transport.readCatalog).toHaveBeenCalledTimes(1)
+    // As duas que queimam crédito só saem do clique.
+    expect(transport.writeTestOrders).not.toHaveBeenCalled()
+    expect(transport.runBuyerAgent).not.toHaveBeenCalled()
+
+    // Nem depois de um re-render por interação com a tela.
+    fireEvent.click(screen.getByText("Catálogo"))
+    expect(transport.writeTestOrders).not.toHaveBeenCalled()
+  })
+
+  it("[custo] o erro do catálogo tem retentativa MANUAL — não fica retentando sozinho", async () => {
+    const readCatalog = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("mcp-server fora do ar"))
+      .mockResolvedValue(lojaRealSemGabaritoCatalog)
+    const transport = createSpyTransport({ readCatalog })
+
+    render(
+      <TransportProvider transport={transport}>
+        <CatalogPage />
+      </TransportProvider>
+    )
+
+    expect(
+      await screen.findByText("Não foi possível ler o catálogo")
+    ).toBeInTheDocument()
+    expect(screen.getByText("mcp-server fora do ar")).toBeInTheDocument()
+
+    // Fica parado no erro até alguém pedir de novo.
+    await waitFor(() => expect(readCatalog).toHaveBeenCalledTimes(1))
+
+    fireEvent.click(screen.getByRole("button", { name: "Tentar de novo" }))
+
+    expect(await screen.findByRole("row", { name: /Aurora NC7/ })).toBeInTheDocument()
+    expect(readCatalog).toHaveBeenCalledTimes(2)
+  })
+
+  it("diz qual transporte está ativo, em vez de dizer sempre 'modo fixture'", async () => {
+    await renderCatalogPage()
+    expect(screen.getByText(EXAM_TRANSPORT_DESCRIPTIONS.fixture)).toBeInTheDocument()
+  })
+
+  it("o aviso de fallback do entry point aparece na tela", async () => {
+    render(
+      <TransportProvider
+        transport={createFixtureTransport()}
+        notice="O host não respondeu ao handshake."
+      >
+        <CatalogPage />
+      </TransportProvider>
+    )
+
+    expect(
+      await screen.findByText("O host não respondeu ao handshake.")
+    ).toBeInTheDocument()
+  })
+
+  it("[transporte fetch] a indisponibilidade do exame vira estado visível, não um erro mudo", async () => {
+    // O front avulso lê o catálogo mas não roda o exame (as tools gastam
+    // crédito e não têm rota isenta). A tela precisa DIZER isso quando o
+    // botão é clicado.
+    const transport = createSpyTransport({
+      writeTestOrders: vi.fn(() =>
+        Promise.reject(
+          new TransportUnavailableError(
+            "fetch",
+            "O front avulso não roda o exame: abra a view dentro do Deco Studio."
+          )
+        )
+      ),
+    })
+
+    await renderCatalogPage(transport)
+    fireEvent.click(screen.getByRole("button", { name: RUN_BUTTON_NAME }))
+
+    expect(
+      await screen.findByText("Não foi possível escrever os pedidos de teste")
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/abra a view dentro do Deco Studio/)
+    ).toBeInTheDocument()
+    // A tabela crua continua no ar — não é tela branca.
+    expect(screen.getByRole("row", { name: /Aurora NC7/ })).toBeInTheDocument()
+  })
+
+  it("resultado VAZIO é estado visível, não um exame 'concluído' sobre zero pedidos", async () => {
+    const transport = createSpyTransport({
+      writeTestOrders: vi.fn(() =>
+        Promise.resolve({
+          catalogSummary: simulationAgentNormalScenario.testOrderGeneration.catalogSummary,
+          orders: [],
+        })
+      ),
+    })
+
+    await renderCatalogPage(transport)
+    fireEvent.click(screen.getByRole("button", { name: RUN_BUTTON_NAME }))
+
+    expect(
+      await screen.findByText(/sem nenhum pedido de teste/)
+    ).toBeInTheDocument()
+    // O placar continua honesto: não examinado é o que aconteceu.
+    expect(screen.getByText("Não examinado")).toBeInTheDocument()
+  })
+
+  it("lote sem desfecho nenhum na etapa 2 também é estado visível", async () => {
+    const transport = createSpyTransport({
+      runBuyerAgent: vi.fn(() =>
+        Promise.resolve({ totalProductCount: 7, outcomes: [] })
+      ),
+    })
+
+    await renderCatalogPage(transport)
+    fireEvent.click(screen.getByRole("button", { name: RUN_BUTTON_NAME }))
+
+    expect(
+      await screen.findByText(/sem nenhum desfecho/)
+    ).toBeInTheDocument()
+    expect(screen.getByText("Não examinado")).toBeInTheDocument()
   })
 })

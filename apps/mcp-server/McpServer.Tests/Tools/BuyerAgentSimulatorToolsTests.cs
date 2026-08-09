@@ -71,7 +71,7 @@ public class BuyerAgentSimulatorToolsTests
         Assert.Null(beforeResult.ChosenProduct);
         Assert.Contains(
             Assert.Single(beforeResult.FilterOutcomes).UnmetRequirements,
-            r => r.Contains("Impermeável"));
+            r => r.Message.Contains("Impermeável"));
 
         Assert.Single(afterResult.PassedCandidates);
         Assert.NotNull(afterResult.ChosenProduct);

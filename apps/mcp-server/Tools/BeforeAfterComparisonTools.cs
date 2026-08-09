@@ -166,9 +166,9 @@ public sealed record BeforeAfterProductComparison(
     bool? CorrectlyClassifiedBefore,
     bool? CorrectlyClassifiedAfter,
     IReadOnlyList<string> ConfirmedRequirementsBefore,
-    IReadOnlyList<string> UnmetRequirementsBefore,
+    IReadOnlyList<UnmetRequirement> UnmetRequirementsBefore,
     IReadOnlyList<string> ConfirmedRequirementsAfter,
-    IReadOnlyList<string> UnmetRequirementsAfter);
+    IReadOnlyList<UnmetRequirement> UnmetRequirementsAfter);
 
 /// <summary>Resumo de uma rodada: quantos produtos (dentre os que tinham expectativa
 /// registrada) foram classificados corretamente, a taxa resultante, e o vencedor da

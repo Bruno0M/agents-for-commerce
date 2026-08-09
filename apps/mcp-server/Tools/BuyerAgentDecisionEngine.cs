@@ -36,7 +36,7 @@ public static class BuyerAgentDecisionEngine
     private static BuyerFilterOutcome EvaluateProduct(BuyerCandidateProduct product, BuyerOrderRequirements requirements)
     {
         var confirmedRequirements = new List<string>();
-        var unmetRequirements = new List<string>();
+        var unmetRequirements = new List<UnmetRequirement>();
 
         foreach (var requirement in requirements.AttributeRequirements)
         {
@@ -44,14 +44,17 @@ public static class BuyerAgentDecisionEngine
 
             if (match.Key is null)
             {
-                unmetRequirements.Add($"Sem dado estruturado para confirmar '{requirement.AttributeName}'.");
+                unmetRequirements.Add(new UnmetRequirement(
+                    $"Sem dado estruturado para confirmar '{requirement.AttributeName}'.",
+                    UnmetRequirementKind.Illegibility));
                 continue;
             }
 
             if (!ValueConfirms(match.Value, requirement.ExpectedValue))
             {
-                unmetRequirements.Add(
-                    $"'{requirement.AttributeName}' = '{match.Value}' não confirma '{requirement.ExpectedValue}'.");
+                unmetRequirements.Add(new UnmetRequirement(
+                    $"'{requirement.AttributeName}' = '{match.Value}' não confirma '{requirement.ExpectedValue}'.",
+                    UnmetRequirementKind.LegitimateRejection));
                 continue;
             }
 
@@ -66,23 +69,26 @@ public static class BuyerAgentDecisionEngine
 
             if (match.Key is null)
             {
-                unmetRequirements.Add(
-                    $"Sem dado estruturado para confirmar '{numericRequirement.AttributeName}' (mínimo {minLabel}).");
+                unmetRequirements.Add(new UnmetRequirement(
+                    $"Sem dado estruturado para confirmar '{numericRequirement.AttributeName}' (mínimo {minLabel}).",
+                    UnmetRequirementKind.Illegibility));
                 continue;
             }
 
             var extractedValue = ExtractLeadingNumber(match.Value);
             if (extractedValue is not { } numericValue)
             {
-                unmetRequirements.Add(
-                    $"'{numericRequirement.AttributeName}' = '{match.Value}' não tem valor numérico reconhecível para confirmar o mínimo de {minLabel}.");
+                unmetRequirements.Add(new UnmetRequirement(
+                    $"'{numericRequirement.AttributeName}' = '{match.Value}' não tem valor numérico reconhecível para confirmar o mínimo de {minLabel}.",
+                    UnmetRequirementKind.Illegibility));
                 continue;
             }
 
             if (numericValue < numericRequirement.MinValue)
             {
-                unmetRequirements.Add(
-                    $"'{numericRequirement.AttributeName}' = '{numericValue.ToString(CultureInfo.InvariantCulture)}{unit}' abaixo do mínimo de {minLabel}.");
+                unmetRequirements.Add(new UnmetRequirement(
+                    $"'{numericRequirement.AttributeName}' = '{numericValue.ToString(CultureInfo.InvariantCulture)}{unit}' abaixo do mínimo de {minLabel}.",
+                    UnmetRequirementKind.LegitimateRejection));
                 continue;
             }
 
@@ -94,13 +100,15 @@ public static class BuyerAgentDecisionEngine
         {
             if (product.Price is not { } price)
             {
-                unmetRequirements.Add(
-                    $"Sem preço estruturado para confirmar o limite de {maxPrice.ToString("C", CultureInfo.InvariantCulture)}.");
+                unmetRequirements.Add(new UnmetRequirement(
+                    $"Sem preço estruturado para confirmar o limite de {maxPrice.ToString("C", CultureInfo.InvariantCulture)}.",
+                    UnmetRequirementKind.Illegibility));
             }
             else if (price > maxPrice)
             {
-                unmetRequirements.Add(
-                    $"Preço {price.ToString("C", CultureInfo.InvariantCulture)} acima do limite de {maxPrice.ToString("C", CultureInfo.InvariantCulture)}.");
+                unmetRequirements.Add(new UnmetRequirement(
+                    $"Preço {price.ToString("C", CultureInfo.InvariantCulture)} acima do limite de {maxPrice.ToString("C", CultureInfo.InvariantCulture)}.",
+                    UnmetRequirementKind.LegitimateRejection));
             }
             else
             {
@@ -343,7 +351,28 @@ public sealed record BuyerFilterOutcome(
     BuyerCandidateProduct Product,
     bool Passed,
     IReadOnlyList<string> ConfirmedRequirements,
-    IReadOnlyList<string> UnmetRequirements);
+    IReadOnlyList<UnmetRequirement> UnmetRequirements);
+
+/// <summary>A natureza de um <see cref="UnmetRequirement"/>: <see cref="Illegibility"/>
+/// quando o agente não teve dado estruturado (ou dado numericamente reconhecível) para
+/// sequer avaliar o requisito, <see cref="LegitimateRejection"/> quando ele avaliou e o
+/// dado estruturado contraria o requisito. Ticket 02 (D3 da spec do exame guiado): essa
+/// distinção é a métrica de topo ("produtos que o agente não conseguiu sequer avaliar")
+/// porque, ao contrário da taxa de sucesso por classificação correta, ela não depende de
+/// um gabarito — é um fato sobre a loja, não sobre o pedido.</summary>
+public enum UnmetRequirementKind
+{
+    Illegibility,
+    LegitimateRejection,
+}
+
+/// <summary>Um requisito não atendido: a frase legível para humano/UI e a natureza do
+/// motivo, emparelhadas no exato ponto de <see cref="BuyerAgentDecisionEngine"/> onde o
+/// motivo é produzido. A natureza nasce aqui — deliberadamente não é derivada depois por
+/// parsing de <see cref="Message"/> em nenhuma camada acima (tool, UI): isso é o que o
+/// ticket 02 existe para proibir, porque ficaria errado no primeiro ajuste de
+/// fraseado.</summary>
+public sealed record UnmetRequirement(string Message, UnmetRequirementKind Kind);
 
 /// <summary>Saída completa da simulação: todos os produtos avaliados (com motivo de
 /// descarte quando aplicável), os que passaram na filtragem, o escolhido (nulo se

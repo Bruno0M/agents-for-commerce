@@ -66,7 +66,7 @@ public class BeforeAfterComparisonToolsTests
         Assert.True(aurora.PassedAfter);
         Assert.False(aurora.CorrectlyClassifiedBefore); // devia passar, mas foi rejeitado por falta de dado estruturado
         Assert.True(aurora.CorrectlyClassifiedAfter);
-        Assert.Contains(aurora.UnmetRequirementsBefore, r => r.Contains("Cancelamento de ruído"));
+        Assert.Contains(aurora.UnmetRequirementsBefore, r => r.Message.Contains("Cancelamento de ruído"));
         Assert.Contains(aurora.ConfirmedRequirementsAfter, r => r.Contains("Cancelamento de ruído"));
 
         var corvo = result.Products.Single(p => p.Handle == "corvo-sport-2");

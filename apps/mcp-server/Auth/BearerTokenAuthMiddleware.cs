@@ -13,7 +13,7 @@ public class BearerTokenAuthMiddleware(RequestDelegate next, IConfiguration conf
 {
     private const string BearerPrefix = "Bearer ";
 
-    private static readonly string[] ExemptPaths = ["/health"];
+    private static readonly string[] ExemptPaths = ["/health", "/catalog"];
 
     private readonly string? _expectedToken = configuration["MCP_BEARER_TOKEN"];
 

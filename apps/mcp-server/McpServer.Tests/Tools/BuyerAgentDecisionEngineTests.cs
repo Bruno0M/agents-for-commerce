@@ -26,7 +26,7 @@ public class BuyerAgentDecisionEngineTests
         Assert.Null(result.ChosenProduct);
         var outcome = Assert.Single(result.FilterOutcomes);
         Assert.False(outcome.Passed);
-        Assert.Contains(outcome.UnmetRequirements, r => r.Contains("Cancelamento de ruído"));
+        Assert.Contains(outcome.UnmetRequirements, r => r.Message.Contains("Cancelamento de ruído"));
     }
 
     [Fact]
@@ -57,7 +57,7 @@ public class BuyerAgentDecisionEngineTests
 
         Assert.Empty(result.PassedCandidates);
         var outcome = Assert.Single(result.FilterOutcomes);
-        Assert.Contains(outcome.UnmetRequirements, r => r.Contains("acima do limite"));
+        Assert.Contains(outcome.UnmetRequirements, r => r.Message.Contains("acima do limite"));
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public class BuyerAgentDecisionEngineTests
 
         Assert.Empty(result.PassedCandidates);
         var outcome = Assert.Single(result.FilterOutcomes);
-        Assert.Contains(outcome.UnmetRequirements, r => r.Contains("Sem preço estruturado"));
+        Assert.Contains(outcome.UnmetRequirements, r => r.Message.Contains("Sem preço estruturado"));
     }
 
     [Fact]
@@ -229,7 +229,7 @@ public class BuyerAgentDecisionEngineTests
         Assert.Empty(result.PassedCandidates);
         var outcome = Assert.Single(result.FilterOutcomes);
         Assert.False(outcome.Passed);
-        Assert.Contains(outcome.UnmetRequirements, r => r.Contains("Cancelamento de ruído"));
+        Assert.Contains(outcome.UnmetRequirements, r => r.Message.Contains("Cancelamento de ruído"));
     }
 
     [Fact]
@@ -265,7 +265,7 @@ public class BuyerAgentDecisionEngineTests
         Assert.Empty(result.PassedCandidates);
         var outcome = Assert.Single(result.FilterOutcomes);
         Assert.False(outcome.Passed);
-        Assert.Contains(outcome.UnmetRequirements, r => r.Contains("14") && r.Contains("abaixo do mínimo"));
+        Assert.Contains(outcome.UnmetRequirements, r => r.Message.Contains("14") && r.Message.Contains("abaixo do mínimo"));
     }
 
     [Fact]
@@ -336,5 +336,163 @@ public class BuyerAgentDecisionEngineTests
 
         Assert.Single(result.PassedCandidates);
         Assert.Equal(matchingShoe, result.ChosenProduct);
+    }
+
+    // Ticket 02 (D3 da spec do exame guiado): a natureza do motivo (ilegibilidade vs.
+    // rejeição legítima) precisa ser um valor do contrato atribuído no ponto de criação,
+    // não algo que a UI derive relendo a frase. Os sete testes abaixo cobrem, um a um,
+    // os sete motivos que EvaluateProduct produz — cada um checando a frase (que não
+    // pode mudar de texto) e a natureza (que é o dado novo) juntas.
+
+    [Fact]
+    public void Simulate_AttributeRequirementWithoutStructuredData_IsIllegibility()
+    {
+        var requirements = new BuyerOrderRequirements(
+            [new BuyerAttributeRequirement("Cor", "azul")]);
+
+        var product = Product("1", "Produto sem specs", attributes: []);
+
+        var result = BuyerAgentDecisionEngine.Simulate(requirements, [product]);
+
+        var reason = Assert.Single(Assert.Single(result.FilterOutcomes).UnmetRequirements);
+        Assert.Equal("Sem dado estruturado para confirmar 'Cor'.", reason.Message);
+        Assert.Equal(UnmetRequirementKind.Illegibility, reason.Kind);
+    }
+
+    [Fact]
+    public void Simulate_NumericMinimumRequirementWithoutStructuredData_IsIllegibility()
+    {
+        var requirements = new BuyerOrderRequirements(
+            [],
+            NumericMinimumRequirements: [new BuyerNumericMinimumRequirement("Autonomia da bateria", 20m, "h")]);
+
+        var product = Product("1", "Produto sem specs", attributes: []);
+
+        var result = BuyerAgentDecisionEngine.Simulate(requirements, [product]);
+
+        var reason = Assert.Single(Assert.Single(result.FilterOutcomes).UnmetRequirements);
+        Assert.Equal("Sem dado estruturado para confirmar 'Autonomia da bateria' (mínimo 20h).", reason.Message);
+        Assert.Equal(UnmetRequirementKind.Illegibility, reason.Kind);
+    }
+
+    [Fact]
+    public void Simulate_MissingStructuredPriceWhenMaxPriceRequired_IsIllegibility()
+    {
+        var requirements = new BuyerOrderRequirements([], MaxPrice: 300m);
+
+        var product = Product("1", "Produto sem preço estruturado", price: null);
+
+        var result = BuyerAgentDecisionEngine.Simulate(requirements, [product]);
+
+        var reason = Assert.Single(Assert.Single(result.FilterOutcomes).UnmetRequirements);
+        Assert.StartsWith("Sem preço estruturado para confirmar o limite de", reason.Message);
+        Assert.Equal(UnmetRequirementKind.Illegibility, reason.Kind);
+    }
+
+    [Fact]
+    public void Simulate_NumericAttributeValueNotRecognizableAsNumber_IsIllegibility()
+    {
+        // O dado existe, mas em prosa — a máquina não consegue extrair um número dele,
+        // não é o produto que falha o requisito. É a linha 4 da tabela do D3.
+        var requirements = new BuyerOrderRequirements(
+            [],
+            NumericMinimumRequirements: [new BuyerNumericMinimumRequirement("Autonomia da bateria", 20m, "h")]);
+
+        var product = Product("1", "Fone com bateria em prosa", attributes: new()
+        {
+            ["Autonomia da bateria"] = "Dura o dia inteiro sem precisar recarregar",
+        });
+
+        var result = BuyerAgentDecisionEngine.Simulate(requirements, [product]);
+
+        var reason = Assert.Single(Assert.Single(result.FilterOutcomes).UnmetRequirements);
+        Assert.Equal(
+            "'Autonomia da bateria' = 'Dura o dia inteiro sem precisar recarregar' não tem valor numérico reconhecível para confirmar o mínimo de 20h.",
+            reason.Message);
+        Assert.Equal(UnmetRequirementKind.Illegibility, reason.Kind);
+    }
+
+    [Fact]
+    public void Simulate_AttributeValuePresentButDoesNotConfirmExpectedValue_IsLegitimateRejection()
+    {
+        var requirements = new BuyerOrderRequirements(
+            [new BuyerAttributeRequirement("Cancelamento de ruído", "ativo")]);
+
+        var product = Product("1", "Fone sem ANC", attributes: new()
+        {
+            ["Cancelamento de ruído"] = "passivo",
+        });
+
+        var result = BuyerAgentDecisionEngine.Simulate(requirements, [product]);
+
+        var reason = Assert.Single(Assert.Single(result.FilterOutcomes).UnmetRequirements);
+        Assert.Equal("'Cancelamento de ruído' = 'passivo' não confirma 'ativo'.", reason.Message);
+        Assert.Equal(UnmetRequirementKind.LegitimateRejection, reason.Kind);
+    }
+
+    [Fact]
+    public void Simulate_NumericAttributeValueBelowMinimum_IsLegitimateRejection()
+    {
+        var requirements = new BuyerOrderRequirements(
+            [],
+            NumericMinimumRequirements: [new BuyerNumericMinimumRequirement("Autonomia da bateria", 20m, "h")]);
+
+        var product = Product("1", "Fone 14h", attributes: new()
+        {
+            ["Autonomia da bateria"] = "14 horas",
+        });
+
+        var result = BuyerAgentDecisionEngine.Simulate(requirements, [product]);
+
+        var reason = Assert.Single(Assert.Single(result.FilterOutcomes).UnmetRequirements);
+        Assert.Equal("'Autonomia da bateria' = '14h' abaixo do mínimo de 20h.", reason.Message);
+        Assert.Equal(UnmetRequirementKind.LegitimateRejection, reason.Kind);
+    }
+
+    [Fact]
+    public void Simulate_StructuredPriceAboveMaxPrice_IsLegitimateRejection()
+    {
+        var requirements = new BuyerOrderRequirements([], MaxPrice: 300m);
+
+        var product = Product("1", "Fone caro", price: 350m);
+
+        var result = BuyerAgentDecisionEngine.Simulate(requirements, [product]);
+
+        var reason = Assert.Single(Assert.Single(result.FilterOutcomes).UnmetRequirements);
+        Assert.StartsWith("Preço", reason.Message);
+        Assert.Contains("acima do limite de", reason.Message);
+        Assert.Equal(UnmetRequirementKind.LegitimateRejection, reason.Kind);
+    }
+
+    [Fact]
+    public void Simulate_ProductAccumulatesReasonsOfBothNaturesInSameEvaluation_BothAppearSeparately()
+    {
+        // Um pedido real mistura os dois: um requisito sem dado nenhum (ilegibilidade) e
+        // um preço estruturado que simplesmente não atende (rejeição legítima). O ticket
+        // 02 exige que as duas naturezas apareçam separadamente no mesmo UnmetRequirements,
+        // não que uma "vença" ou apague a outra.
+        var requirements = new BuyerOrderRequirements(
+            [new BuyerAttributeRequirement("Cor", "azul")],
+            MaxPrice: 300m);
+
+        var product = Product("1", "Produto caro e sem cor estruturada", price: 350m, attributes: []);
+
+        var result = BuyerAgentDecisionEngine.Simulate(requirements, [product]);
+
+        var outcome = Assert.Single(result.FilterOutcomes);
+        Assert.False(outcome.Passed);
+        Assert.Equal(2, outcome.UnmetRequirements.Count);
+
+        var illegibilityReason = Assert.Single(
+            outcome.UnmetRequirements, r => r.Kind == UnmetRequirementKind.Illegibility);
+        Assert.Equal("Sem dado estruturado para confirmar 'Cor'.", illegibilityReason.Message);
+
+        var legitimateRejectionReason = Assert.Single(
+            outcome.UnmetRequirements, r => r.Kind == UnmetRequirementKind.LegitimateRejection);
+        Assert.Contains("acima do limite de", legitimateRejectionReason.Message);
+
+        Assert.Equal(
+            [UnmetRequirementKind.Illegibility, UnmetRequirementKind.LegitimateRejection],
+            outcome.UnmetRequirements.Select(r => r.Kind));
     }
 }

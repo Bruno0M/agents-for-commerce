@@ -1,6 +1,8 @@
 using System.Net.Http.Headers;
 using McpServer.Auth;
 using McpServer.Infrastructure;
+using McpServer.Tools;
+using ModelContextProtocol;
 using ShopifySharp;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,6 +34,13 @@ var shopifyClientSecret = RequireConfig("SHOPIFY_CLIENT_SECRET");
 
 var studioApiKey = RequireConfig("STUDIO_API_KEY");
 
+// apps/web (Vite SPA) reads the catalog straight from the browser — no bearer token
+// in the frontend bundle, so this one GET is exempted from BearerTokenAuthMiddleware
+// and opened up via CORS below. Scoped to this single route, not the MCP endpoint.
+builder.Services.AddCors(options => options.AddPolicy(
+    "catalog-read",
+    policy => policy.AllowAnyOrigin().WithMethods("GET")));
+
 builder.Services.AddHttpClient();
 
 // Singleton para que o cache do token seja compartilhado por todas as requisições.
@@ -40,6 +49,11 @@ builder.Services.AddSingleton(sp => new ShopifyAccessTokenProvider(
     shopifyStoreDomain,
     shopifyClientId,
     shopifyClientSecret));
+
+// WithToolsFromAssembly() (below) wires CatalogReadTools into MCP's own tool-call
+// dispatch, but doesn't register it as a DI service — the plain GET /catalog route
+// resolves it as a minimal-API parameter, so it needs its own registration here.
+builder.Services.AddTransient<CatalogReadTools>();
 
 builder.Services.AddSingleton(sp => new ShopifyGraphServiceFactory(
     sp.GetRequiredService<ShopifyAccessTokenProvider>(),
@@ -75,14 +89,38 @@ builder.Services
         // See https://csharp.sdk.modelcontextprotocol.io/concepts/transports/transports.html for details.
         options.Stateless = true;
     })
-    .WithToolsFromAssembly();
+    .WithToolsFromAssembly()
+    // Ticket 01: registers HelloHandshakeResource's ui:// resource so resources/list and
+    // resources/read work — without this, HelloHandshakeTools' _meta.ui.resourceUri points
+    // at a resource the server never serves, and the Studio iframe gets nothing back.
+    .WithResourcesFromAssembly();
 
 var app = builder.Build();
+
+app.UseCors();
 
 // Runs before MCP (and everything else) so unauthenticated requests never reach MCP logic.
 app.UseMiddleware<BearerTokenAuthMiddleware>();
 
 app.MapGet("/health", () => Results.Ok());
+
+// Plain JSON mirror of the get_product_catalog MCP tool (ticket 01), for apps/web —
+// a browser can't speak MCP's JSON-RPC transport. Same CatalogReadTools call, same
+// ProductCatalogReadResult shape, so there's exactly one place that knows how to read
+// the catalog.
+app.MapGet("/catalog", async (CatalogReadTools catalogTools, CancellationToken cancellationToken) =>
+{
+    try
+    {
+        var result = await catalogTools.GetProductCatalog(cancellationToken);
+        return Results.Ok(result);
+    }
+    catch (McpException ex)
+    {
+        return Results.Problem(ex.Message, statusCode: StatusCodes.Status502BadGateway);
+    }
+})
+.RequireCors("catalog-read");
 
 app.MapMcp();
 

@@ -1,3 +1,15 @@
+/**
+ * Os tipos do catálogo — cópia fiel, campo a campo, dos records C# de
+ * `apps/mcp-server/Tools/CatalogReadTools.cs`.
+ *
+ * Este arquivo NÃO fala rede. Até a issue #6 ele também guardava o
+ * `fetchCatalog` que chamava `GET /catalog`; aquela função virou a
+ * implementação `fetch` da interface de transporte e mora em
+ * `@/transport/fetchTransport`. Os tipos ficaram porque são comuns aos três
+ * transportes — quem só precisa da FORMA do catálogo importa daqui e não
+ * arrasta nenhuma decisão de origem do dado junto.
+ */
+
 export interface ProductOptionContent {
   name: string
   values: string[]
@@ -51,21 +63,4 @@ export interface ProductCatalogReadResult {
   products: ProductCatalogContent[]
   reachedProductLimit: boolean
   productLimit: number
-}
-
-const MCP_SERVER_URL =
-  import.meta.env.VITE_MCP_SERVER_URL ?? "http://localhost:6142"
-
-export async function fetchCatalog(
-  signal?: AbortSignal,
-): Promise<ProductCatalogReadResult> {
-  const response = await fetch(`${MCP_SERVER_URL}/catalog`, { signal })
-
-  if (!response.ok) {
-    throw new Error(
-      `Falha ao carregar o catálogo (${response.status} ${response.statusText})`,
-    )
-  }
-
-  return response.json() as Promise<ProductCatalogReadResult>
 }

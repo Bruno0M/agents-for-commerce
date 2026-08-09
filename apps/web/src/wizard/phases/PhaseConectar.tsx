@@ -2,7 +2,10 @@ import type { ProductCatalogReadResult } from "@/lib/catalog"
 import { PhasePlaceholder } from "./PhasePlaceholder"
 
 // Catálogo mínimo de exemplo — só para liberar o avanço em modo fixture.
-// O transporte real (fetchCatalog contra GET /catalog) é do ticket 05.
+// O wizard não passou pelo transporte da issue #6 de propósito: ele está
+// em vias de ser aposentado (ticket 08 da `catalogo-como-exame`), e a tela
+// que consome transporte de verdade é a `CatalogPage`. Quem religar este
+// fluxo troca este bloco por `useExamTransport().readCatalog()`.
 const FIXTURE_CATALOG: ProductCatalogReadResult = {
   products: [
     {

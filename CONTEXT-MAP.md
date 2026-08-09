@@ -4,7 +4,7 @@
 
 - [MCP Server](./apps/mcp-server/CONTEXT.md) — agente de GEO: lê catálogo, gera conteúdo otimizado, simula agente comprador, publica sugestões
 - Storefront (`apps/storefront/`) — TanStack Start + React 19 + Cloudflare Workers, Shopify como backend. Ainda sem `CONTEXT.md` — só o `AGENTS.md` existente com notas de stack/conteúdo `.deco/`.
-- Web (`apps/web/`) — Vite + React + shadcn/ui; a view do exame, servida pelo MCP Server como MCP App dentro do Studio. Ainda sem `CONTEXT.md`.
+- [Web](./apps/web/CONTEXT.md) — Vite + React + shadcn/ui; a view do exame, servida pelo MCP Server como MCP App dentro do Studio. Uma árvore de componentes, três transportes.
 
 Criar cada `CONTEXT.md` quando a primeira decisão/termo específico daquele contexto for resolvido.
 

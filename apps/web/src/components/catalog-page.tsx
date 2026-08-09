@@ -1,7 +1,11 @@
-import { useReducer, useState } from "react"
-import { FilterXIcon } from "lucide-react"
+import { useCallback, useEffect, useReducer, useState } from "react"
+import { AlertCircleIcon, FilterXIcon, Loader2Icon } from "lucide-react"
 
-import type { ProductCatalogContent } from "@/lib/catalog"
+import type {
+  ProductCatalogContent,
+  ProductCatalogReadResult,
+} from "@/lib/catalog"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -32,7 +36,6 @@ import { ExamStateBadge } from "@/diagnosis/components/ExamStateBadge"
 import { NatureBadge } from "@/diagnosis/components/NatureBadge"
 import { ProductDrillDownDialog } from "@/diagnosis/components/ProductDrillDownDialog"
 import { aggregateExamOutcomes } from "@/diagnosis/catalogExam"
-import { lojaRealSemGabaritoCatalog } from "@/diagnosis/fixtures/loja-real-sem-gabarito"
 import { EXAM_STATE_LABELS } from "@/diagnosis/lib/examStateLabels"
 import {
   DEFAULT_CATALOG_EXAM_ROW_FILTERS,
@@ -40,25 +43,13 @@ import {
   type CatalogExamRowFilters,
 } from "@/diagnosis/lib/filterCatalogExamRows"
 import { sortCatalogExamRows } from "@/diagnosis/lib/rankCatalogExamRows"
-import { runSimulationAgent } from "@/diagnosis/lib/runSimulationAgent"
 import {
   catalogSimulationRunReducer,
   INITIAL_CATALOG_SIMULATION_RUN_STATE,
 } from "@/diagnosis/lib/simulationRun"
 import type { GeneratedTestOrder, ProductExamRow } from "@/diagnosis/types"
-
-// O catálogo desta tela é SEMPRE a fixture `lojaRealSemGabaritoCatalog` —
-// decisão literal do dono do projeto: "enquanto não tiver conexão com api,
-// vai ser sempre dado mockado, remova esse toggle". As fixtures do agente A
-// (`diagnosis/fixtures/simulationAgentPayloads.ts`) são chaveadas nos
-// produtos deste catálogo; misturar um catálogo lido de verdade
-// (`fetchCatalog`, `@/lib/catalog`) com desfechos mockados produziria linhas
-// sem produto correspondente. `fetchCatalog` continua existindo e intacto —
-// só sem uso NESTA tela — para religar barato quando o transporte real
-// existir (ticket 05 do `exame-guiado`). Por não haver mais leitura
-// assíncrona nenhuma para o catálogo, não existe `useState`/`useEffect` de
-// carregamento aqui: o catálogo é uma constante do módulo.
-const catalog = lojaRealSemGabaritoCatalog
+import { useExamTransport, useTransportNotice } from "@/transport/context"
+import { EXAM_TRANSPORT_DESCRIPTIONS } from "@/transport/types"
 
 export function priceRange(prices: (string | null)[]): string {
   const values = prices
@@ -77,7 +68,131 @@ export function priceRange(prices: (string | null)[]): string {
     : `R$ ${min.toFixed(2)} – R$ ${max.toFixed(2)}`
 }
 
+/**
+ * A tela do catálogo-como-exame. Ela não sabe de onde o dado vem: pede o
+ * transporte ativo ao contexto (`@/transport/context`) e chama os três
+ * métodos da interface. Dentro do Studio isso vira `callServerTool`; no
+ * front avulso, `GET /catalog`; em modo fixture, os payloads congelados —
+ * e nada aqui muda entre os três (D2 da spec `web-como-view-do-studio`).
+ *
+ * A leitura do catálogo é o ÚNICO efeito de montagem desta tela, e ela pode
+ * ser um: `get_product_catalog` não passa por LLM nenhum, custa zero. As
+ * duas tools do exame (`generate_test_orders`, `simulate_buyer_agent`)
+ * gastam crédito por chamada e só saem do clique do usuário — nunca de
+ * render, nunca de efeito, nunca de retentativa automática. Toda
+ * retentativa desta tela, inclusive a do catálogo, é um botão.
+ */
 export function CatalogPage() {
+  const transport = useExamTransport()
+  const notice = useTransportNotice()
+
+  const [catalogState, setCatalogState] = useState<CatalogLoadState>({
+    status: "loading",
+  })
+  // Incrementado pelo botão "Tentar de novo" — é o que torna a releitura
+  // uma AÇÃO do usuário, e não um retry automático escondido no efeito.
+  const [reloadToken, setReloadToken] = useState(0)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    let active = true
+
+    transport
+      .readCatalog({ signal: controller.signal })
+      .then((catalog) => {
+        if (active) setCatalogState({ status: "ready", catalog })
+      })
+      .catch((error: unknown) => {
+        // Um abort nosso (desmontagem, StrictMode, troca de transporte) não
+        // é falha — quem cancelou já sabe, e virar `Alert` na tela seria
+        // ruído.
+        if (!active) return
+        setCatalogState({ status: "error", message: describeError(error) })
+      })
+
+    return () => {
+      active = false
+      controller.abort()
+    }
+  }, [transport, reloadToken])
+
+  return (
+    <div className="flex flex-col gap-6 p-6">
+      <div>
+        <h1 className="text-lg font-semibold">Catálogo</h1>
+        <p className="text-sm text-muted-foreground">
+          {EXAM_TRANSPORT_DESCRIPTIONS[transport.kind]}
+        </p>
+      </div>
+
+      {notice !== null && (
+        <Alert variant="destructive">
+          <AlertCircleIcon />
+          <AlertTitle>O host não assumiu esta tela</AlertTitle>
+          <AlertDescription>{notice}</AlertDescription>
+        </Alert>
+      )}
+
+      {catalogState.status === "loading" && (
+        <span
+          role="status"
+          className="flex items-center gap-2 text-sm text-muted-foreground"
+        >
+          <Loader2Icon className="size-3.5 animate-spin" aria-hidden="true" />
+          Lendo o catálogo da loja…
+        </span>
+      )}
+
+      {catalogState.status === "error" && (
+        <Alert variant="destructive">
+          <AlertCircleIcon />
+          <AlertTitle>Não foi possível ler o catálogo</AlertTitle>
+          <AlertDescription>{catalogState.message}</AlertDescription>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-2"
+            // O "carregando" volta AQUI, no clique, e não dentro do efeito:
+            // é a ação do usuário que reabre a leitura, e o efeito só
+            // reage a ela.
+            onClick={() => {
+              setCatalogState({ status: "loading" })
+              setReloadToken((token) => token + 1)
+            }}
+          >
+            Tentar de novo
+          </Button>
+        </Alert>
+      )}
+
+      {catalogState.status === "ready" && (
+        <CatalogExam
+          // Uma rodada de exame só faz sentido contra o catálogo que a
+          // produziu: trocar de catálogo remonta o exame do zero em vez de
+          // deixar linhas de uma loja sobre os produtos de outra.
+          key={reloadToken}
+          catalog={catalogState.catalog}
+        />
+      )}
+    </div>
+  )
+}
+
+type CatalogLoadState =
+  | { status: "loading" }
+  | { status: "ready"; catalog: ProductCatalogReadResult }
+  | { status: "error"; message: string }
+
+function describeError(error: unknown): string {
+  return error instanceof Error
+    ? error.message
+    : "Erro desconhecido ao falar com o transporte."
+}
+
+function CatalogExam({ catalog }: { catalog: ProductCatalogReadResult }) {
+  const transport = useExamTransport()
+
   // O estado de EXECUÇÃO do botão único "Rodar Agente de Simulação" —
   // `writing-orders` (etapa 1) → `running-agent` (etapa 2, já com os
   // pedidos da etapa 1) → `success`/`error`. `catalogSimulationRunReducer`
@@ -112,19 +227,20 @@ export function CatalogPage() {
   // O botão único: uma chamada orquestra as duas etapas reais —
   // `writeTestOrders` (o agente escreve os pedidos em prosa) e
   // `runBuyerAgent` (o agente compra contra eles) — e agrega o resultado
-  // com `aggregateExamOutcomes` (o mesmo agregador que o servidor vai
-  // alimentar quando o transporte existir). O lojista não aprova nem edita
-  // nada entre as duas chamadas: elas disparam em sequência, sem passo
-  // intermediário nem navegação.
-  async function runSimulation() {
+  // com `aggregateExamOutcomes` (o mesmo agregador dos três transportes).
+  // O lojista não aprova nem edita nada entre as duas chamadas: elas
+  // disparam em sequência, sem passo intermediário nem navegação.
+  //
+  // ESTAS SÃO AS DUAS CHAMADAS QUE GASTAM CRÉDITO DE LLM, e este é o único
+  // caminho que leva a elas: o `onClick` do painel. Nenhum efeito, nenhum
+  // render e nenhuma retentativa automática chega aqui.
+  const runSimulation = useCallback(async () => {
     const scope = { productCount: catalog.products.length }
     dispatchRun({ type: "start", scope })
 
-    let generation: Awaited<
-      ReturnType<typeof runSimulationAgent.writeTestOrders>
-    >
+    let generation
     try {
-      generation = await runSimulationAgent.writeTestOrders(catalog.products)
+      generation = await transport.writeTestOrders(catalog.products)
     } catch (error) {
       dispatchRun({
         type: "failure",
@@ -137,16 +253,41 @@ export function CatalogPage() {
       return
     }
 
+    // Resposta vazia é resultado, não sucesso: sem pedido nenhum a etapa 2
+    // não teria o que rodar, e a tela mostraria um exame "concluído" sobre
+    // zero pedidos. Vira o mesmo estado visível de falha, com a diferença
+    // dita em voz alta.
+    if (generation.orders.length === 0) {
+      dispatchRun({
+        type: "failure",
+        stage: "writing-orders",
+        message:
+          "O gerador respondeu sem nenhum pedido de teste — não há exame para rodar.",
+      })
+      return
+    }
+
     // Os pedidos da etapa 1 ficam visíveis na hora — o painel read-only já
     // os renderiza enquanto a etapa 2 está em voo (ver o comentário de
     // cabeçalho de `CatalogExamOrdersPanel`).
     dispatchRun({ type: "ordersWritten", orders: generation.orders })
 
     try {
-      const batch = await runSimulationAgent.runBuyerAgent(
+      const batch = await transport.runBuyerAgent(
         catalog.products,
         generation.orders
       )
+
+      if (batch.outcomes.length === 0) {
+        dispatchRun({
+          type: "failure",
+          stage: "running-agent",
+          message:
+            "O agente comprador respondeu sem nenhum desfecho — nenhum pedido foi avaliado contra o catálogo.",
+        })
+        return
+      }
+
       const result = aggregateExamOutcomes(catalog.products, batch.outcomes)
       dispatchRun({ type: "success", result, outcomes: batch.outcomes })
     } catch (error) {
@@ -159,7 +300,7 @@ export function CatalogPage() {
             : "Erro desconhecido ao rodar o agente comprador.",
       })
     }
-  }
+  }, [catalog, transport])
 
   // O RESULTADO (para o placar e a tabela) é derivado do estado de
   // execução — "examinado" só quando a rodada terminou com sucesso.
@@ -225,14 +366,7 @@ export function CatalogPage() {
     runState.status === "success" ? runState.outcomes : []
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      <div>
-        <h1 className="text-lg font-semibold">Catálogo</h1>
-        <p className="text-sm text-muted-foreground">
-          Loja de exemplo sem gabarito — modo fixture, sem servidor no ar.
-        </p>
-      </div>
-
+    <>
       <CatalogExamStrip
         totalProductCount={catalog.products.length}
         exam={exam}
@@ -360,7 +494,7 @@ export function CatalogPage() {
           if (!open) setSelectedProductId(null)
         }}
       />
-    </div>
+    </>
   )
 }
 
